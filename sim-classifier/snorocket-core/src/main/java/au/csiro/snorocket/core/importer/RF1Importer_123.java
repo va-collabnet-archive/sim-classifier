@@ -20,13 +20,13 @@ import java.util.TreeSet;
 import org.semanticweb.owlapi.reasoner.ReasonerProgressMonitor;
 
 import au.csiro.snorocket.core.IFactory_123;
-import au.csiro.snorocket.core.GCI_123;
-import au.csiro.snorocket.core.Inclusion_123;
-import au.csiro.snorocket.core.RI_123;
-import au.csiro.snorocket.core.AbstractConcept;
-import au.csiro.snorocket.core.Concept;
-import au.csiro.snorocket.core.Conjunction;
-import au.csiro.snorocket.core.Existential;
+import au.csiro.snorocket.core.axioms.GCI_123;
+import au.csiro.snorocket.core.axioms.Inclusion_123;
+import au.csiro.snorocket.core.axioms.RI_123;
+import au.csiro.snorocket.core.model.AbstractConcept;
+import au.csiro.snorocket.core.model.Concept;
+import au.csiro.snorocket.core.model.Conjunction;
+import au.csiro.snorocket.core.model.Existential;
 
 /**
  * Transforms the native RF2 files used in SNOMED into the native format used by

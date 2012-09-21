@@ -28,12 +28,12 @@ import java.util.Set;
 import org.semanticweb.owlapi.reasoner.NullReasonerProgressMonitor;
 import org.semanticweb.owlapi.reasoner.ReasonerProgressMonitor;
 
-import au.csiro.snorocket.core.DenseConceptMap;
-import au.csiro.snorocket.core.IConceptMap;
-import au.csiro.snorocket.core.IConceptSet;
-import au.csiro.snorocket.core.IntIterator;
-import au.csiro.snorocket.core.SparseConceptHashSet;
-import au.csiro.snorocket.core.SparseConceptMap;
+import au.csiro.snorocket.core.util.DenseConceptMap;
+import au.csiro.snorocket.core.util.IConceptMap;
+import au.csiro.snorocket.core.util.IConceptSet;
+import au.csiro.snorocket.core.util.IntIterator;
+import au.csiro.snorocket.core.util.SparseConceptHashSet;
+import au.csiro.snorocket.core.util.SparseConceptMap;
 
 /**
  * Builds the taxonomy based on the result of the classification process.

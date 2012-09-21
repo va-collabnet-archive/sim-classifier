@@ -23,9 +23,9 @@ package au.csiro.snorocket.core;
 
 import java.util.logging.Logger;
 
-import au.csiro.snorocket.core.IConceptMap;
-import au.csiro.snorocket.core.IConceptSet;
-import au.csiro.snorocket.core.IntIterator;
+import au.csiro.snorocket.core.util.IConceptMap;
+import au.csiro.snorocket.core.util.IConceptSet;
+import au.csiro.snorocket.core.util.IntIterator;
 
 /**
  * Class to compute DAG, equivalents, and other post-classification information
