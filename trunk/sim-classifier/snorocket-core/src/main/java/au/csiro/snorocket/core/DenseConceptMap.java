@@ -92,7 +92,7 @@ extends AbstractConceptMap<V>
     }
 
     public int size() {
-        throw new UnsupportedOperationException();
+        return members.length;
     }
 
     public void grow(int newSize) {
