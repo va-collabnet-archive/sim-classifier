@@ -7,9 +7,9 @@ package au.csiro.snorocket.core;
 import java.util.HashSet;
 import java.util.Set;
 
-import au.csiro.snorocket.core.IConceptSet;
-import au.csiro.snorocket.core.IntIterator;
-import au.csiro.snorocket.core.SparseConceptSet;
+import au.csiro.snorocket.core.util.IConceptSet;
+import au.csiro.snorocket.core.util.IntIterator;
+import au.csiro.snorocket.core.util.SparseConceptSet;
 
 /**
  * Represents a node in the taxonomy generated after classifying an ontology.
