@@ -50,6 +50,7 @@ import au.csiro.snorocket.core.Inclusion_123;
 import au.csiro.snorocket.core.IntIterator;
 import au.csiro.snorocket.core.NormalisedOntology_123;
 import au.csiro.snorocket.core.ParseException;
+import au.csiro.snorocket.core.PostProcessedData_123;
 import au.csiro.snorocket.core.R;
 import au.csiro.snorocket.core.RI_123;
 import au.csiro.snorocket.core.RoleSet;

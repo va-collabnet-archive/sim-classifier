@@ -19,16 +19,13 @@
  * All rights reserved. Use is subject to license terms and conditions.
  */
 
-package au.csiro.snorocket.snapi;
+package au.csiro.snorocket.core;
 
 import java.util.logging.Logger;
 
-import au.csiro.snorocket.core.ConceptSetFactory;
 import au.csiro.snorocket.core.IConceptMap;
 import au.csiro.snorocket.core.IConceptSet;
-import au.csiro.snorocket.core.IFactory;
 import au.csiro.snorocket.core.IntIterator;
-import au.csiro.snorocket.core.Snorocket;
 
 /**
  * Class to compute DAG, equivalents, and other post-classification information
@@ -36,13 +33,13 @@ import au.csiro.snorocket.core.Snorocket;
  * @author law223
  *
  */
-public class PostProcessedData {
+public class PostProcessedData_123 {
 
     private static final Logger LOGGER = Snorocket.getLogger();
 
     // Input state
     final private IConceptMap<IConceptSet> subsumptions;
-    final private IFactory factory;
+    final private IFactory_123 factory;
 
     // Computed state
     final private IConceptSet classified;
@@ -67,21 +64,21 @@ public class PostProcessedData {
 
     };
 
-    PostProcessedData(final IFactory factory, final IConceptMap<IConceptSet> subsumptions) {
-        this.factory = factory;
+    public PostProcessedData_123(final IFactory_123 factory2, final IConceptMap<IConceptSet> subsumptions) {
+        this.factory = factory2;
         this.subsumptions = subsumptions;
 
-        classified = IConceptSet.FACTORY.createConceptSet(factory.getTotalConcepts());
-        parents = IConceptMap.FACTORY.createDenseConceptMap(factory.getTotalConcepts());
+        classified = IConceptSet.FACTORY.createConceptSet(factory2.getTotalConcepts());
+        parents = IConceptMap.FACTORY.createDenseConceptMap(factory2.getTotalConcepts());
 //      children = new DenseConceptMap<ConceptSet>(factory.getTotalConcepts());
-        equivalents = IConceptMap.FACTORY.createSparseConceptMap(factory.getTotalConcepts());
+        equivalents = IConceptMap.FACTORY.createSparseConceptMap(factory2.getTotalConcepts());
         redundant = IConceptSet.FACTORY.createConceptSet();
         problems = IConceptSet.FACTORY.createConceptSet(20000); // FIXME size estimate?!?
 
         computeDag();
     }
 
-    PostProcessedData(final IFactory factory, final IConceptMap<IConceptSet> baseSubsumptions, final IConceptMap<IConceptSet> deltaSubsumptions) {
+    public PostProcessedData_123(final IFactory_123 factory, final IConceptMap<IConceptSet> baseSubsumptions, final IConceptMap<IConceptSet> deltaSubsumptions) {
         this.factory = factory;
         this.subsumptions = deltaSubsumptions;
 
@@ -258,7 +255,7 @@ public class PostProcessedData {
 
         candidates.removeAll(marked);
         parents.put(A, candidates);
-        if (candidates.contains(IFactory.BOTTOM_CONCEPT)) {
+        if (candidates.contains(IFactory_123.BOTTOM_CONCEPT)) {
             problems.add(A);
         }
         //      for (IntIterator itr = candidates.iterator(); itr.hasNext(); ) {

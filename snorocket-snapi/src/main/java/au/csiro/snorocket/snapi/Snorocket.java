@@ -55,6 +55,7 @@ import au.csiro.snorocket.core.Inclusion;
 import au.csiro.snorocket.core.IntIterator;
 import au.csiro.snorocket.core.NormalisedOntology;
 import au.csiro.snorocket.core.ParseException;
+import au.csiro.snorocket.core.PostProcessedData;
 import au.csiro.snorocket.core.R;
 import au.csiro.snorocket.core.RI;
 import au.csiro.snorocket.core.RoleSet;
@@ -807,6 +808,7 @@ public class Snorocket implements I_Snorocket {
 	 * @see {@link I_Snorocket#getEquivalents(au.csiro.snorocket.snapi.I_Snorocket.I_EquivalentCallback)}
 	 */
 	public void getEquivalents(I_EquivalentCallback callback) {
+		/*
 		final IConceptMap<IConceptSet> equivalents = getPostProcessedData()
 				.getEquivalents();
 		for (final IntIterator keyItr = equivalents.keyIterator(); keyItr
@@ -839,6 +841,7 @@ public class Snorocket implements I_Snorocket {
 				}
 			}
 		}
+		*/
 	}
 
 	public void getRelationships(I_Callback callback) {
@@ -851,6 +854,7 @@ public class Snorocket implements I_Snorocket {
 
 	private void returnRelationships(final I_Callback callback,
 			final boolean filterRedundant) {
+		/*
 		if (null == classification) {
 			throw new IllegalStateException("Ontology has not been classified.");
 		}
@@ -891,6 +895,7 @@ public class Snorocket implements I_Snorocket {
 					.warning("SNOMED CT should not contain nested role groups, but detected "
 							+ nestedRoleGroupCount);
 		}
+		*/
 	}
 
 	private PostProcessedData getPostProcessedData() {
@@ -900,13 +905,15 @@ public class Snorocket implements I_Snorocket {
 
 		final IConceptMap<IConceptSet> subsumptions = classification
 				.getSubsumptions();
-
+		
+		/*
 		if (null == postProcessedData) {
 			postProcessedData = null == baseClassification ? new PostProcessedData(
 					factory, subsumptions)
 					: new PostProcessedData(factory, baseClassification
 							.getSubsumptions(), subsumptions);
 		}
+		*/
 
 		return postProcessedData;
 	}
