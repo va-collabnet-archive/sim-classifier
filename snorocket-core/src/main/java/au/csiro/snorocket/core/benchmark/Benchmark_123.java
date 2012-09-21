@@ -21,7 +21,7 @@ import au.csiro.snorocket.core.IFactory_123;
 import au.csiro.snorocket.core.NormalisedOntology_123;
 import au.csiro.snorocket.core.NormalisedOntology_123.Classification;
 import au.csiro.snorocket.core.PostProcessedData_123;
-import au.csiro.snorocket.core.Inclusion_123;
+import au.csiro.snorocket.core.axioms.Inclusion_123;
 import au.csiro.snorocket.core.importer.RF1Importer_123;
 
 /**
@@ -94,8 +94,7 @@ public class Benchmark_123 {
 			sb.append("Date,VM Parameters,Concepts File,Relationships File," +
 					"Snorocket Version,Axiom Transformation Time (ms)," +
 					"Axiom Loading Time (ms),Classification Time(ms)," +
-					"Taxonomy Construction Time(ms), Total Time(ms), " +
-					"Used Memory(bytes), Max Memory (bytes)\n");
+					"Taxonomy Construction Time(ms), Total Time(ms)\n");
 			
 			for(int j = 0; j < numRuns; j++) {
 				Stats stats = Benchmark_123.runBechmarkRF1(concepts, relations);
@@ -126,11 +125,6 @@ public class Benchmark_123 {
 				sb.append(stats.getTaxonomyBuildingTimeMs());
 				sb.append(",");
 				sb.append(stats.getTotalTime());
-				sb.append(",");
-				sb.append(Runtime.getRuntime().totalMemory()-
-						Runtime.getRuntime().freeMemory());
-				sb.append(",");
-				sb.append(Runtime.getRuntime().maxMemory());
 				sb.append("\n");
 
 				System.gc();

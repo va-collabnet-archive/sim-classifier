@@ -20,13 +20,13 @@ import java.util.TreeSet;
 import org.semanticweb.owlapi.reasoner.ReasonerProgressMonitor;
 
 import au.csiro.snorocket.core.IFactory;
-import au.csiro.snorocket.core.GCI;
-import au.csiro.snorocket.core.Inclusion;
-import au.csiro.snorocket.core.RI;
-import au.csiro.snorocket.core.AbstractConcept;
-import au.csiro.snorocket.core.Concept;
-import au.csiro.snorocket.core.Conjunction;
-import au.csiro.snorocket.core.Existential;
+import au.csiro.snorocket.core.axioms.GCI;
+import au.csiro.snorocket.core.axioms.Inclusion;
+import au.csiro.snorocket.core.axioms.RI;
+import au.csiro.snorocket.core.model.AbstractConcept;
+import au.csiro.snorocket.core.model.Concept;
+import au.csiro.snorocket.core.model.Conjunction;
+import au.csiro.snorocket.core.model.Existential;
 
 /**
  * Transforms the native RF1 files used in SNOMED into the native format used by
@@ -191,6 +191,7 @@ public class RF1Importer {
 			
 			SortedSet<String> classes = new TreeSet<String>();
 			SortedSet<String> props = new TreeSet<String>();
+			SortedSet<String> feats = new TreeSet<String>();
 			
 			// Add RoleGroup - doesn't use prefix
 			props.add("RoleGroup");
@@ -218,13 +219,17 @@ public class RF1Importer {
 				factory.getRole(pr);
 			}
 			
+			for(String feat : feats) {
+				factory.getFeature(feat);
+			}
+			
 			// Add the role axioms
 			for(String r1 : roles.keySet()) {
 				String parentRole = roles.get(r1).get("parentrole");
 				
 				if(!"".equals(parentRole)) {
 					axioms.add(new RI(
-							new int[]{factory.getRole(PRE+r1)}, 
+							factory.getRole(PRE+r1), 
 							factory.getRole(PRE+parentRole)));
 				}
 				
@@ -251,7 +256,7 @@ public class RF1Importer {
 				if(numElems == 0) {
 					// do nothing
 				} else if(numElems == 1) {
-					axioms.add(new GCI(new Concept(factory.getConcept(PRE+c1)), 
+					axioms.add(new GCI(factory.getConcept(PRE+c1), 
 							factory.getConcept(PRE+prs.iterator().next())));
 				} else {					
 					List<AbstractConcept> conjs = new ArrayList<>();
