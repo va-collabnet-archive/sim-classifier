@@ -156,6 +156,17 @@ public class NormalisedOntology {
     }
     
     /**
+     * Normalises and loads a set of axioms.
+     * 
+     * @param inclusions
+     */
+    public void loadAxioms(final Set<? extends Inclusion> inclusions) {
+    	for (Inclusion i: normalise(inclusions)) {
+            addTerm(i.getNormalForm());
+        }
+    }
+    
+    /**
      * Returns a set of Inclusions in normal form suitable for classifying.
      */
     protected Set<Inclusion> normalise(final Set<? extends Inclusion> inclusions) {
