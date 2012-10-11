@@ -30,6 +30,7 @@ import java.io.InputStream;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.Ignore;
 
 import au.csiro.snorocket.snapi.I_Snorocket.I_Callback;
 
@@ -45,7 +46,8 @@ public class TestIncremental {
     @Before
     public void setUp() throws Exception {
     }
-
+	
+	@Ignore
     @Test
     public void createEmptyInitialState() throws IOException {
         I_Snorocket rocket = new Snorocket();
@@ -54,7 +56,8 @@ public class TestIncremental {
         InputStream out = rocket.getStream();
         assertNotNull(out);
     }
-
+	
+	@Ignore
     @Test
     public void createAndRestoreEmptyInitialState() throws IOException {
         I_Snorocket rocket1 = new Snorocket();
@@ -72,6 +75,7 @@ public class TestIncremental {
         });
     }
     
+	@Ignore
     @Test
     public void createEmptyLocalExtension() {
         I_Snorocket rocket1 = new Snorocket();
@@ -89,6 +93,7 @@ public class TestIncremental {
         assertNotNull(rocket2);
     }
     
+	@Ignore
     @Test
     public void createNonEmptyLocalExtension() {
         System.out.println("---------------------------------- createNonEmptyLocalExtension");
@@ -98,7 +103,8 @@ public class TestIncremental {
         final I_Snorocket rocket2 = rocket1.createExtension();
         classifyExtraIsaRelationshipWithExistingConcept(rocket2);
     }
-
+	
+	@Ignore
     @Test
     public void createNonEmptySerialisedExtensionWithExistingConceptAndIsa() throws IOException {
         System.out.println("---------------------------------- createNonEmptySerialisedExtensionWithExistingConceptAndIsa");
@@ -106,6 +112,7 @@ public class TestIncremental {
         classifyExtraIsaRelationshipWithExistingConcept(rocket2);
     }
     
+	@Ignore
     @Test
     public void createNonEmptySerialisedExtensionWithNewConceptAndIsa() throws IOException {
         System.out.println("---------------------------------- createNonEmptySerialisedExtensionWithNewConceptAndIsa");
@@ -117,6 +124,7 @@ public class TestIncremental {
      * C [ hasProperty.A
      * B [ hasProperty.C
      */
+	 @Ignore
     @Test
     public void createNonEmptySerialisedExtensionWithHasProperty() throws IOException {
         System.out.println("---------------------------------- createNonEmptySerialisedExtensionWithHasProperty");
@@ -128,6 +136,7 @@ public class TestIncremental {
      * C [ hasProperty.A
      * X [ hasProperty.C
      */
+	 @Ignore
     @Test
     public void createNonEmptySerialisedExtensionWithNewConceptAndHasProperty() throws IOException {
         System.out.println("---------------------------------- createNonEmptySerialisedExtensionWithNewConceptAndHasProperty");
