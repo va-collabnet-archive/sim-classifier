@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.junit.Test;
+import org.junit.Ignore;
 
 public class TestEquivalents extends AbstractTest {
 
@@ -33,7 +34,7 @@ public class TestEquivalents extends AbstractTest {
     private static final String CONCEPT3 = "D";
     private static final String HAS_PROPERTY = "hasProperty";
 
-
+	@Ignore
     @Test
     public void testSimpleEquivalency() {
         final I_Snorocket rocket = new Snorocket();
@@ -51,7 +52,8 @@ public class TestEquivalents extends AbstractTest {
         checkExpectedDistributionRelationshipCount(rocket, 0);
         checkExpectedEquivalenceCount(rocket, 1);
     }
-
+	
+	@Ignore
     @Test
     public void testNonincrementalEquivalency() {
         final I_Snorocket rocket = new Snorocket();
@@ -68,7 +70,8 @@ public class TestEquivalents extends AbstractTest {
         checkExpectedDistributionRelationshipCount(rocket, 3);
         checkExpectedEquivalenceCount(rocket, 1);
     }
-
+	
+	@Ignore
     @Test
     public void testIncrementalEquivalency() {
         final I_Snorocket rocket = getExtensionRocket();
