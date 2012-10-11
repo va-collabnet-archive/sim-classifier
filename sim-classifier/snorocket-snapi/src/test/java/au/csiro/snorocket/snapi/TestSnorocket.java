@@ -47,6 +47,7 @@ import java.util.zip.GZIPOutputStream;
 
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.Ignore;
 
 import au.csiro.snorocket.core.Factory;
 import au.csiro.snorocket.core.IFactory;
@@ -152,6 +153,7 @@ public class TestSnorocket {
      * Non-redundant defining relationships == distribution form
      * 
      */
+	@Ignore
     @Test
     public void definingNonRedundantRelationships() throws FileNotFoundException, ParseException {
         Snorocket.DEBUGGING = true;
