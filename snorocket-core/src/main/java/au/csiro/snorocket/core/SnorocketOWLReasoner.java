@@ -58,7 +58,6 @@ import org.semanticweb.owlapi.reasoner.impl.OWLNamedIndividualNodeSet;
 import org.semanticweb.owlapi.reasoner.impl.OWLObjectPropertyNode;
 import org.semanticweb.owlapi.util.Version;
 
-import au.csiro.snorocket.core.NormalisedOntology.Classification;
 import au.csiro.snorocket.core.axioms.Inclusion;
 import au.csiro.snorocket.core.importer.OWLImporter;
 import au.csiro.snorocket.core.util.IConceptMap;
@@ -140,8 +139,8 @@ public class SnorocketOWLReasoner implements OWLReasoner {
 	public void synchronise() {
 		reset();
 		loadAxioms();
-		Classification c = reasoner.getClassification();
-		final IConceptMap<IConceptSet> s = c.getSubsumptions();
+		reasoner.classify();
+		final IConceptMap<IConceptSet> s = reasoner.getSubsumptions();
         ppd.computeDag(factory, s, monitor);
 	}
 	
@@ -244,7 +243,34 @@ public class SnorocketOWLReasoner implements OWLReasoner {
             return;
         }
 		
-		synchronise();
+		boolean hasImportChange = false;
+		List<OWLAxiom> newAxioms = new ArrayList<OWLAxiom>();
+		
+		for(OWLOntologyChange change : rawChanges) {
+			if(change.isImportChange()) {
+				hasImportChange = true;
+				break;
+			} else if(change.isAxiomChange()) {
+				OWLAxiom axiom = change.getAxiom();
+				newAxioms.add(axiom);
+			} else {
+				// Should never happen
+				assert(false);
+			}
+		}
+		
+		if(hasImportChange) {
+			synchronise();
+		} else {
+			OWLImporter oi = new OWLImporter(reasoner.getFactory());
+			Set<Inclusion> axioms = oi.transform(newAxioms, monitor);
+			reasoner.classifyIncremental(axioms);
+			final IConceptMap<IConceptSet> n = reasoner.getNewSubsumptions();
+			final IConceptMap<IConceptSet> a = 
+					reasoner.getAffectedSubsumptions();
+	        ppd.computeDagIncremental(factory, n, a, monitor);
+		}
+		
 		rawChanges.clear();
 	}
 

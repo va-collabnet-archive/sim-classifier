@@ -23,7 +23,7 @@ package au.csiro.snorocket.core;
 
 import au.csiro.snorocket.core.util.MonotonicCollection;
 
-interface IQueue<QueueEntry> {
+public interface IQueue<QueueEntry> {
     void add(QueueEntry o);
     QueueEntry remove();
     int size();

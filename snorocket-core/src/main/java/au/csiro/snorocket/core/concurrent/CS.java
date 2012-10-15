@@ -19,20 +19,37 @@
  * All rights reserved. Use is subject to license terms and conditions.
  */
 
-package au.csiro.snorocket.core.axioms;
+package au.csiro.snorocket.core.concurrent;
+
+import au.csiro.snorocket.core.IFactory;
+import au.csiro.snorocket.core.util.IConceptSet;
+import au.csiro.snorocket.core.util.SparseConceptSet;
 
 /**
- * Base class for normalised axioms.
+ * Concurrent version of S.
  * 
- * @author law223
- *
+ * @author Alejandro Metke
  */
-public abstract class NormalFormGCI {
-	
-	/**
-	 * Returns an array with all the concept ids in the axiom.
-	 * 
-	 * @return int[]
-	 */
-	public abstract int[] getConceptsInAxiom();
+public final class CS {
+
+    private IConceptSet set;
+    
+    CS(final int cid) {
+    	set = new SparseConceptSet();
+    	set.add(cid);
+    	set.add(IFactory.TOP_CONCEPT);
+    }
+    
+    public IConceptSet getSet() {
+        return set;
+    }
+
+    void put(int parent) {
+        set.add(parent);
+    }
+    
+    public String toString() {
+        return set.toString();
+    }
+
 }

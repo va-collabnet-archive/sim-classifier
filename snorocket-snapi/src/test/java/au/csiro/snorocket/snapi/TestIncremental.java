@@ -57,6 +57,7 @@ public class TestIncremental {
         assertNotNull(out);
     }
 	
+	/*
 	@Ignore
     @Test
     public void createAndRestoreEmptyInitialState() throws IOException {
@@ -74,6 +75,7 @@ public class TestIncremental {
             }
         });
     }
+    */
     
 	@Ignore
     @Test
@@ -104,6 +106,7 @@ public class TestIncremental {
         classifyExtraIsaRelationshipWithExistingConcept(rocket2);
     }
 	
+	/*
 	@Ignore
     @Test
     public void createNonEmptySerialisedExtensionWithExistingConceptAndIsa() throws IOException {
@@ -111,7 +114,9 @@ public class TestIncremental {
         final I_Snorocket rocket2 = getExtensionRocket();
         classifyExtraIsaRelationshipWithExistingConcept(rocket2);
     }
+    */
     
+	/*
 	@Ignore
     @Test
     public void createNonEmptySerialisedExtensionWithNewConceptAndIsa() throws IOException {
@@ -119,11 +124,13 @@ public class TestIncremental {
         final I_Snorocket rocket2 = getExtensionRocket();
         classifyExtraIsaRelationshipWithNewConcept(rocket2);
     }
+    */
     
     /**
      * C [ hasProperty.A
      * B [ hasProperty.C
      */
+	/*
 	 @Ignore
     @Test
     public void createNonEmptySerialisedExtensionWithHasProperty() throws IOException {
@@ -131,11 +138,13 @@ public class TestIncremental {
         final I_Snorocket rocket2 = getExtensionRocket();
         classifyExtraHasPropertyRelationshipWithExistingConcept(rocket2);
     }
+    */
     
     /**
      * C [ hasProperty.A
      * X [ hasProperty.C
      */
+	/*
 	 @Ignore
     @Test
     public void createNonEmptySerialisedExtensionWithNewConceptAndHasProperty() throws IOException {
@@ -143,10 +152,12 @@ public class TestIncremental {
         final I_Snorocket rocket2 = getExtensionRocket();
         classifyExtraHasPropertyRelationshipWithNewConcept(rocket2);
     }
+    */
 
     /**
      * C [ hasProperty.A
      */
+	 /*
     private I_Snorocket getExtensionRocket() throws IOException {
         I_Snorocket rocket1 = getInitialClassifiedRocket();
         System.out.println("----------------------------------");
@@ -157,6 +168,7 @@ public class TestIncremental {
         final I_Snorocket rocket2 = new Snorocket(state).createExtension();
         return rocket2;
     }
+    */
 
     /**
      * C [ hasProperty.A
@@ -167,11 +179,6 @@ public class TestIncremental {
         rocket.addConcept(CONCEPT2, false);      // C
         rocket.addConcept(HAS_PROPERTY, false);
         rocket.addRelationship(CONCEPT2, HAS_PROPERTY, CONCEPT0, 0);   // C [ hasProperty.A
-        
-        if (false) {
-            rocket.addConcept(CONCEPT3, false);  // X
-            rocket.addRelationship(CONCEPT0, ISA, CONCEPT3, 0);   // A [ X
-        }
     }
 
     /**

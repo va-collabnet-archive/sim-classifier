@@ -26,35 +26,24 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.io.Reader;
-import java.io.Writer;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.Ignore;
 
-import au.csiro.snorocket.core.Factory;
 import au.csiro.snorocket.core.IFactory;
-import au.csiro.snorocket.core.NormalisedOntology;
 import au.csiro.snorocket.core.ParseException;
 import au.csiro.snorocket.core.Snorocket;
-import au.csiro.snorocket.core.NormalisedOntology.Classification;
 import au.csiro.snorocket.core.axioms.Inclusion;
 import au.csiro.snorocket.core.util.LineReader;
 import au.csiro.snorocket.snapi.I_Snorocket.I_Callback;
@@ -362,7 +351,6 @@ class Main implements Runnable {
 
     public Main(String[] args) {
 //        Snorocket.installLoggingHander();
-        NormalisedOntology.setBatchMode(true);
         if (null != args) {
             processArgs(args);
         }
@@ -449,10 +437,6 @@ class Main implements Runnable {
 //                    Snorocket.uninstallLoggingHander();
                 } else if (arg.equals("--XvirtualConcepts")) {
                     setIncludeVirtualConcepts(true);
-                } else if (arg.equals("--Xbatch")) {
-                    NormalisedOntology.setBatchMode(true);
-                } else if (arg.equals("--Xnobatch")) {
-                    NormalisedOntology.setBatchMode(false);
                 } else if (arg.equals("--Xcompress")) {
                     setUsingCompression(true);
                 } else {
@@ -550,6 +534,7 @@ class Main implements Runnable {
         }
     }
     
+    /*
     protected NormalisedOntology loadOntology() {
         long start = System.currentTimeMillis();
         
@@ -615,13 +600,15 @@ class Main implements Runnable {
         if (null == classification) {
             normalisedOntology = new NormalisedOntology(factory, ontology);
         } else {
-            normalisedOntology = classification.getExtensionOntology(factory, ontology);
+            //normalisedOntology = classification.getExtensionOntology(factory, ontology);
+        	normalisedOntology = null;
         }
 
         LOGGER.info("Load + normalise time: " + (System.currentTimeMillis()-start)/1000.0 + "s");
         
         return normalisedOntology;
     }
+    */
 
     private Set<Inclusion> loadSnorocketOntology(final IFactory factory) {
         if (null != getConceptsFile()) {
@@ -726,8 +713,9 @@ class Main implements Runnable {
     private void handleFileNotFoundException(FileNotFoundException e, String file) {
         LOGGER.log(Level.SEVERE, "File not found: " + file + ", " + e.getMessage(), e);
     }
-
+    
     public void run() {
+    	/*
         long start = System.currentTimeMillis();
         final NormalisedOntology normalisedOntology = loadOntology();
 
@@ -806,7 +794,7 @@ class Main implements Runnable {
 //                }
 //            }
         }
-
+		*/
     }
 
     public boolean isSkipHeader() {

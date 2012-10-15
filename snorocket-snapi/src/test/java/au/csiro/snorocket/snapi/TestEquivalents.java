@@ -16,14 +16,8 @@
  */
 package au.csiro.snorocket.snapi;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
-
-import java.io.IOException;
-import java.io.InputStream;
-
-import org.junit.Test;
 import org.junit.Ignore;
+import org.junit.Test;
 
 public class TestEquivalents extends AbstractTest {
 
@@ -71,6 +65,7 @@ public class TestEquivalents extends AbstractTest {
         checkExpectedEquivalenceCount(rocket, 1);
     }
 	
+	/*
 	@Ignore
     @Test
     public void testIncrementalEquivalency() {
@@ -87,7 +82,9 @@ public class TestEquivalents extends AbstractTest {
         // The following is undefined
 //        checkExpectedEquivalenceCount(rocket, 1);
     }
+    */
     
+	/*
     private I_Snorocket getExtensionRocket() {
         I_Snorocket rocket1 = getInitialClassifiedRocket();
         System.out.println("----------------------------------");
@@ -104,8 +101,10 @@ public class TestEquivalents extends AbstractTest {
         final I_Snorocket rocket2 = new Snorocket(state).createExtension();
         return rocket2;
     }
+    */
 
-    private I_Snorocket getInitialClassifiedRocket() {
+    @SuppressWarnings("unused")
+	private I_Snorocket getInitialClassifiedRocket() {
         final I_Snorocket rocket = new Snorocket();
         rocket.setIsa(ISA);
         initRocket(rocket);
