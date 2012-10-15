@@ -23,10 +23,11 @@ package au.csiro.snorocket.core.util;
 
 
 /**
- * Implementation of the IConceptSet API that does not support clear() or remove()/removeAll().
- * Set entries are stored in sorted order to allow for O(log n) lookup time.
- * Inserts require copying all larger values to make remove for the inserted value.
- * Worst-case insert performance happens when elements are added largest to smallest. 
+ * Implementation of the IConceptSet API that does not support clear() or 
+ * remove()/removeAll(). Set entries are stored in sorted order to allow for 
+ * O(log n) lookup time. Inserts require copying all larger values to make 
+ * remove for the inserted value. Worst-case insert performance happens when 
+ * elements are added largest to smallest. 
  * 
  * @author law223
  *
@@ -49,7 +50,7 @@ final public class SparseConceptSet implements IConceptSet {
         this(10);
     }
 
-    public void add(final int concept) {
+    public synchronized void add(final int concept) {
         int low = 0;
         int high = size;
         while ((high - low) > 16) {
@@ -139,20 +140,8 @@ final public class SparseConceptSet implements IConceptSet {
         return 0 == size();
     }
 
-    public IntIterator iterator() {
-        return new IntIterator() {
-
-            int next = 0;
-
-            public boolean hasNext() {
-                return next < size;
-            }
-
-            public int next() {
-                return hasNext() ? items[next++] : -1;
-            }
-
-        };
+    public synchronized IntIterator iterator() {
+    	return new SparseConceptSetIntIterator(items, size);
     }
 
     public void remove(int concept) {
@@ -181,10 +170,22 @@ final public class SparseConceptSet implements IConceptSet {
         return size;
     }
 
-    public void grow(int newSize) {
+    public synchronized void grow(int newSize) {
+    	assert newSize >= size;
+    	
         final int[] newItems = new int[newSize];
         System.arraycopy(items, 0, newItems, 0, size);
         items = newItems;
     }
+
+	@Override
+	public int[] toArray() {
+		int[] res = new int[size];
+		for(int i = 0; i < size; i++) {
+			res[i] = items[i];
+		}
+		
+		return res;
+	}
 
 }

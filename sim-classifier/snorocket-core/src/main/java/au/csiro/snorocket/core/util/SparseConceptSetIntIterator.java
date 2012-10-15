@@ -19,20 +19,36 @@
  * All rights reserved. Use is subject to license terms and conditions.
  */
 
-package au.csiro.snorocket.core.axioms;
+package au.csiro.snorocket.core.util;
 
 /**
- * Base class for normalised axioms.
+ * {@link IntIterator} used in the {@link SparseConceptSet} implementation.
  * 
- * @author law223
+ * @author Alejandro Metke
  *
  */
-public abstract class NormalFormGCI {
+public class SparseConceptSetIntIterator implements IntIterator {
 	
-	/**
-	 * Returns an array with all the concept ids in the axiom.
-	 * 
-	 * @return int[]
-	 */
-	public abstract int[] getConceptsInAxiom();
+	private int[] items;
+    private int size;
+    private int next = 0;
+	
+	public SparseConceptSetIntIterator(int[] i, int size) {
+		synchronized (this) {
+			items = new int[i.length];
+			System.arraycopy(i, 0, items, 0, items.length);
+			this.size = size;
+		}
+	}
+	
+	@Override
+	public boolean hasNext() {
+		return next < size;
+	}
+
+	@Override
+	public int next() {
+		return hasNext() ? items[next++] : -1;
+	}
+
 }
