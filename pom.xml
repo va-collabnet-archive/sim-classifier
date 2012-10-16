@@ -30,7 +30,6 @@
 		<module>snorocket-core</module>
 		<module>snorocket-snapi</module>
 		<module>snorocket</module>
-		<module>snorocket-tests</module>
 		<module>snorocket-bridge</module>
 	</modules>
 	<dependencies>
@@ -66,6 +65,15 @@
 	  </plugin>
 	</plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>run-its</id>
+      <modules>
+        <module>snorocket-tests</module>
+      </modules>
+    </profile>
+  </profiles>
 
   <!-- Temporary until we set up a parent POM -->
   <distributionManagement>
