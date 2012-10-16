@@ -52,6 +52,12 @@
 				</os>
 			</activation>
 		</profile>
+    <profile>
+      <id>run-its</id>
+      <modules>
+        <module>snorocket-tests</module>
+      </modules>
+    </profile>
 	</profiles>
 	<build>
     <plugins>
@@ -65,15 +71,6 @@
 	  </plugin>
 	</plugins>
   </build>
-
-  <profiles>
-    <profile>
-      <id>run-its</id>
-      <modules>
-        <module>snorocket-tests</module>
-      </modules>
-    </profile>
-  </profiles>
 
   <!-- Temporary until we set up a parent POM -->
   <distributionManagement>
