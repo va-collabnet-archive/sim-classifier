@@ -86,8 +86,8 @@
   <!-- Temporary until we set up a parent POM -->
   <distributionManagement>
     <repository>
-      <id>sim-releases</id>
-      <url>https://localhost:8082/archiva/repository/sim-releases</url>
+      <id>maestro-deploy</id>
+      <url>https://va.maestrodev.com/archiva/repository/sim-releases</url>
     </repository>
   </distributionManagement>
 </project>
