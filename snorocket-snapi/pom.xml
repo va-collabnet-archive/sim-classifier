@@ -23,7 +23,7 @@
   <parent>
     <groupId>au.csiro</groupId>
     <artifactId>snorocket-parent</artifactId>
-    <version>1.1.22-uat-build-1</version>
+    <version>1.1.23-uat-build-1-SNAPSHOT</version>
   </parent>
   
   <dependencies>
