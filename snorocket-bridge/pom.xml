@@ -16,10 +16,7 @@
  -->
 
   <modelVersion>4.0.0</modelVersion>
-  <groupId>au.csiro</groupId>
   <artifactId>snorocket-bridge</artifactId>
-  <packaging>jar</packaging>
-  <version>1.1.22-SNAPSHOT</version>
   <name>Snorocket-ACE Bridge</name>
   
   <parent>
@@ -32,7 +29,7 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>snorocket-snapi</artifactId>
-      <version>1.1.22-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
   </dependencies>
   

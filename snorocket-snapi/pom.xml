@@ -18,8 +18,6 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>au.csiro</groupId>
   <artifactId>snorocket-snapi</artifactId>
-  <packaging>jar</packaging>
-  <version>1.1.22-SNAPSHOT</version>
   <name>Snorocket SNOMED-oriented Classifier Interface</name>
   
   <parent>
@@ -32,7 +30,7 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>snorocket-core</artifactId>
-      <version>1.1.22-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>net.sourceforge.owlapi</groupId>
