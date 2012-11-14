@@ -12,15 +12,19 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import au.csiro.snorocket.core.axioms.GCI;
+import au.csiro.ontology.axioms.IAxiom;
+import au.csiro.ontology.axioms.ConceptInclusion;
+import au.csiro.ontology.axioms.RoleInclusion;
+import au.csiro.ontology.model.IConcept;
+import au.csiro.ontology.model.Concept;
+import au.csiro.ontology.model.Conjunction;
+import au.csiro.ontology.model.Datatype;
+import au.csiro.ontology.model.Existential;
+import au.csiro.ontology.model.Feature;
+import au.csiro.ontology.model.IntegerLiteral;
+import au.csiro.ontology.model.Operator;
+import au.csiro.ontology.model.Role;
 import au.csiro.snorocket.core.axioms.Inclusion;
-import au.csiro.snorocket.core.axioms.RI;
-import au.csiro.snorocket.core.model.AbstractConcept;
-import au.csiro.snorocket.core.model.Concept;
-import au.csiro.snorocket.core.model.Conjunction;
-import au.csiro.snorocket.core.model.Datatype;
-import au.csiro.snorocket.core.model.Existential;
-import au.csiro.snorocket.core.model.IntegerLiteral;
 import au.csiro.snorocket.core.util.IConceptMap;
 import au.csiro.snorocket.core.util.IConceptSet;
 
@@ -37,68 +41,67 @@ public class TestNormalisedOntology {
      */
     @Test
     public void testEndocarditis() {
-        IFactory factory = new Factory();
+        // Create roles
+        Role<String> contIn = new Role<>("cont-in");
+        Role<String> partOf = new Role<>("part-of");
+        Role<String> hasLoc = new Role<>("has-loc");
+        Role<String> actsOn = new Role<>("acts-on");
 
-        // Add roles
-        int contIn = factory.getRole("cont-in");
-        int partOf = factory.getRole("part-of");
-        int hasLoc = factory.getRole("has-loc");
-        int actsOn = factory.getRole("acts-on");
+        // Create concepts
+        Concept<String> endocardium = new Concept<>("Endocardium");
+        Concept<String> tissue = new Concept<>("Tissue");
+        Concept<String> heartWall = new Concept<>("HeartWall");
+        Concept<String> heartValve = new Concept<>("HeartValve");
+        Concept<String> bodyWall = new Concept<>("BodyWall");
+        Concept<String> heart = new Concept<>("Heart");
+        Concept<String> bodyValve = new Concept<>("BodyValve");
+        Concept<String> endocarditis = new Concept<>("Endocarditis");
+        Concept<String> inflammation = new Concept<>("Inflammation");
+        Concept<String> disease = new Concept<>("Disease");
+        Concept<String> heartdisease = new Concept<>("Heartdisease");
+        Concept<String> criticalDisease = new Concept<>("CriticalDisease");
 
-        // Add concepts
-        int endocardium = factory.getConcept("Endocardium");
-        int tissue = factory.getConcept("Tissue");
-        int heartWall = factory.getConcept("HeartWall");
-        int heartValve = factory.getConcept("HeartValve");
-        int bodyWall = factory.getConcept("BodyWall");
-        int heart = factory.getConcept("Heart");
-        int bodyValve = factory.getConcept("BodyValve");
-        int endocarditis = factory.getConcept("Endocarditis");
-        int inflammation = factory.getConcept("Inflammation");
-        int disease = factory.getConcept("Disease");
-        int heartdisease = factory.getConcept("Heartdisease");
-        int criticalDisease = factory.getConcept("CriticalDisease");
+        // Create axioms
+        ConceptInclusion a1 = new ConceptInclusion(endocardium,
+                new Conjunction(new IConcept[] { tissue,
+                        new Existential<>(contIn, heartWall),
+                        new Existential<>(contIn, heartValve) }));
 
-        // Add axioms
-        GCI a1 = new GCI(endocardium, new Conjunction(new AbstractConcept[] {
-                new Concept(tissue),
-                new Existential(contIn, new Concept(heartWall)),
-                new Existential(contIn, new Concept(heartValve)) }));
+        ConceptInclusion a2 = new ConceptInclusion(heartWall, new Conjunction(
+                new IConcept[] { bodyWall,
+                        new Existential<>(partOf, heart) }));
 
-        GCI a2 = new GCI(heartWall, new Conjunction(new AbstractConcept[] {
-                new Concept(bodyWall),
-                new Existential(partOf, new Concept(heart)) }));
+        ConceptInclusion a3 = new ConceptInclusion(heartValve, new Conjunction(
+                new IConcept[] { bodyValve,
+                        new Existential<>(partOf, heart) }));
 
-        GCI a3 = new GCI(heartValve, new Conjunction(new AbstractConcept[] {
-                new Concept(bodyValve),
-                new Existential(partOf, new Concept(heart)) }));
+        ConceptInclusion a4 = new ConceptInclusion(endocarditis,
+                new Conjunction(new IConcept[] { inflammation,
+                        new Existential<>(hasLoc, endocardium) }));
 
-        GCI a4 = new GCI(endocarditis, new Conjunction(new AbstractConcept[] {
-                new Concept(inflammation),
-                new Existential(hasLoc, new Concept(endocardium)) }));
+        ConceptInclusion a5 = new ConceptInclusion(inflammation,
+                new Conjunction(new IConcept[] { disease,
+                        new Existential<>(actsOn, tissue) }));
 
-        GCI a5 = new GCI(inflammation, new Conjunction(new AbstractConcept[] {
-                new Concept(disease),
-                new Existential(actsOn, new Concept(tissue)) }));
+        ConceptInclusion a6 = new ConceptInclusion(new Conjunction(
+                new IConcept[] { heartdisease,
+                        new Existential<>(hasLoc, heartValve) }), criticalDisease);
 
-        GCI a6 = new GCI(new Conjunction(new AbstractConcept[] {
-                new Concept(heartdisease),
-                new Existential(hasLoc, new Concept(heartValve)) }),
-                criticalDisease);
+        ConceptInclusion a7 = new ConceptInclusion(heartdisease,
+                new Conjunction(new IConcept[] { disease,
+                        new Existential<>(hasLoc, heart) }));
 
-        GCI a7 = new GCI(heartdisease, new Conjunction(new AbstractConcept[] {
-                new Concept(disease),
-                new Existential(hasLoc, new Concept(heart)) }));
+        ConceptInclusion a8 = new ConceptInclusion(
+                new Conjunction(new IConcept[] { disease,
+                        new Existential<>(hasLoc, heart) }), heartdisease);
 
-        GCI a8 = new GCI(new Conjunction(new AbstractConcept[] {
-                new Concept(disease),
-                new Existential(hasLoc, new Concept(heart)) }), heartdisease);
+        RoleInclusion a9 = new RoleInclusion(new Role[] { partOf, partOf },
+                partOf);
+        RoleInclusion a10 = new RoleInclusion(partOf, contIn);
+        RoleInclusion a11 = new RoleInclusion(new Role[] { hasLoc, contIn },
+                hasLoc);
 
-        RI a9 = new RI(new int[] { partOf, partOf }, partOf);
-        RI a10 = new RI(partOf, contIn);
-        RI a11 = new RI(new int[] { hasLoc, contIn }, hasLoc);
-
-        Set<Inclusion> axioms = new HashSet<Inclusion>();
+        Set<IAxiom> axioms = new HashSet<>();
         axioms.add(a1);
         axioms.add(a2);
         axioms.add(a3);
@@ -112,87 +115,110 @@ public class TestNormalisedOntology {
         axioms.add(a11);
 
         // Classify
-        NormalisedOntology o = new NormalisedOntology(factory, axioms);
+        IFactory<String> factory = new Factory<>();
+        NormalisedOntology<String> o = new NormalisedOntology<>(factory, axioms);
+        
+        int total = factory.getTotalConcepts();
+        for(int i = 2; i < total; i++) {
+            Object ob = factory.lookupConceptId(i);
+            String str = ob.toString();
+            System.out.println(i+ "->"+str);
+        }
+        total = factory.getTotalRoles();
+        for(int i = 0; i < total; i++) {
+            System.out.println(i+ "->"+factory.lookupRoleId(i).toString());
+        }
+        total = factory.getTotalFeatures();
+        for(int i = 0; i < total; i++) {
+            System.out.println(i+ "->"+factory.lookupFeatureId(i).toString());
+        }
+        
         o.classify();
         final IConceptMap<IConceptSet> s = o.getSubsumptions();
 
         // Build taxonomy
-        PostProcessedData ppd = new PostProcessedData();
-        ppd.computeDag(factory, s, null);
+        PostProcessedData<String> ppd = new PostProcessedData<>(factory);
+        ppd.computeDag(s, null);
 
         // Test results
         ClassNode bottomNode = ppd.getEquivalents(IFactory.BOTTOM_CONCEPT);
         Set<ClassNode> bottomRes = bottomNode.getParents();
 
         assertTrue(bottomRes.size() == 5);
-        assertTrue(bottomRes.contains(ppd.getEquivalents(endocardium)));
-        assertTrue(bottomRes.contains(ppd.getEquivalents(endocarditis)));
-        assertTrue(bottomRes.contains(ppd.getEquivalents(heartWall)));
-        assertTrue(bottomRes.contains(ppd.getEquivalents(heartValve)));
-        assertTrue(bottomRes.contains(ppd.getEquivalents(heart)));
+        assertTrue(bottomRes.contains(ppd.getEquivalents(endocardium.getId())));
+        assertTrue(bottomRes.contains(ppd.getEquivalents(endocarditis.getId())));
+        assertTrue(bottomRes.contains(ppd.getEquivalents(heartWall.getId())));
+        assertTrue(bottomRes.contains(ppd.getEquivalents(heartValve.getId())));
+        assertTrue(bottomRes.contains(ppd.getEquivalents(heart.getId())));
 
-        ClassNode endocarditisNode = ppd.getEquivalents(endocarditis);
+        ClassNode endocarditisNode = ppd.getEquivalents(endocarditis.getId());
         Set<ClassNode> endocarditisRes = endocarditisNode.getParents();
         assertTrue(endocarditisRes.size() == 3);
-        assertTrue(endocarditisRes.contains(ppd.getEquivalents(inflammation)));
-        assertTrue(endocarditisRes.contains(ppd.getEquivalents(heartdisease)));
-        assertTrue(endocarditisRes
-                .contains(ppd.getEquivalents(criticalDisease)));
+        assertTrue(endocarditisRes.contains(ppd.getEquivalents(inflammation
+                .getId())));
+        assertTrue(endocarditisRes.contains(ppd.getEquivalents(heartdisease
+                .getId())));
+        assertTrue(endocarditisRes.contains(ppd.getEquivalents(criticalDisease
+                .getId())));
 
-        ClassNode inflammationNode = ppd.getEquivalents(inflammation);
+        ClassNode inflammationNode = ppd.getEquivalents(inflammation.getId());
         Set<ClassNode> inflammationRes = inflammationNode.getParents();
         assertTrue(inflammationRes.size() == 1);
-        assertTrue(inflammationRes.contains(ppd.getEquivalents(disease)));
+        assertTrue(inflammationRes
+                .contains(ppd.getEquivalents(disease.getId())));
 
-        ClassNode endocardiumNode = ppd.getEquivalents(endocardium);
+        ClassNode endocardiumNode = ppd.getEquivalents(endocardium.getId());
         Set<ClassNode> endocardiumRes = endocardiumNode.getParents();
         assertTrue(endocardiumRes.size() == 1);
-        assertTrue(endocardiumRes.contains(ppd.getEquivalents(tissue)));
+        assertTrue(endocardiumRes.contains(ppd.getEquivalents(tissue.getId())));
 
-        ClassNode heartdiseaseNode = ppd.getEquivalents(heartdisease);
+        ClassNode heartdiseaseNode = ppd.getEquivalents(heartdisease.getId());
         Set<ClassNode> heartdiseaseRes = heartdiseaseNode.getParents();
         assertTrue(heartdiseaseRes.size() == 1);
-        assertTrue(heartdiseaseRes.contains(ppd.getEquivalents(disease)));
+        assertTrue(heartdiseaseRes
+                .contains(ppd.getEquivalents(disease.getId())));
 
-        ClassNode heartWallNode = ppd.getEquivalents(heartWall);
+        ClassNode heartWallNode = ppd.getEquivalents(heartWall.getId());
         Set<ClassNode> heartWallRes = heartWallNode.getParents();
         assertTrue(heartWallRes.size() == 1);
-        assertTrue(heartWallRes.contains(ppd.getEquivalents(bodyWall)));
+        assertTrue(heartWallRes.contains(ppd.getEquivalents(bodyWall.getId())));
 
-        ClassNode heartValveNode = ppd.getEquivalents(heartValve);
+        ClassNode heartValveNode = ppd.getEquivalents(heartValve.getId());
         Set<ClassNode> heartValveRes = heartValveNode.getParents();
         assertTrue(heartValveRes.size() == 1);
-        assertTrue(heartValveRes.contains(ppd.getEquivalents(bodyValve)));
+        assertTrue(heartValveRes
+                .contains(ppd.getEquivalents(bodyValve.getId())));
 
-        ClassNode diseaseNode = ppd.getEquivalents(disease);
+        ClassNode diseaseNode = ppd.getEquivalents(disease.getId());
         Set<ClassNode> diseaseRes = diseaseNode.getParents();
         assertTrue(diseaseRes.size() == 1);
         assertTrue(diseaseRes
                 .contains(ppd.getEquivalents(IFactory.TOP_CONCEPT)));
 
-        ClassNode tissueNode = ppd.getEquivalents(tissue);
+        ClassNode tissueNode = ppd.getEquivalents(tissue.getId());
         Set<ClassNode> tissueRes = tissueNode.getParents();
         assertTrue(tissueRes.size() == 1);
         assertTrue(tissueRes.contains(ppd.getEquivalents(IFactory.TOP_CONCEPT)));
 
-        ClassNode heartNode = ppd.getEquivalents(heart);
+        ClassNode heartNode = ppd.getEquivalents(heart.getId());
         Set<ClassNode> heartRes = heartNode.getParents();
         assertTrue(heartRes.size() == 1);
         assertTrue(heartRes.contains(ppd.getEquivalents(IFactory.TOP_CONCEPT)));
 
-        ClassNode bodyValveNode = ppd.getEquivalents(bodyValve);
+        ClassNode bodyValveNode = ppd.getEquivalents(bodyValve.getId());
         Set<ClassNode> bodyValveRes = bodyValveNode.getParents();
         assertTrue(bodyValveRes.size() == 1);
         assertTrue(bodyValveRes.contains(ppd
                 .getEquivalents(IFactory.TOP_CONCEPT)));
 
-        ClassNode bodyWallNode = ppd.getEquivalents(bodyWall);
+        ClassNode bodyWallNode = ppd.getEquivalents(bodyWall.getId());
         Set<ClassNode> bodyWallRes = bodyWallNode.getParents();
         assertTrue(bodyWallRes.size() == 1);
         assertTrue(bodyWallRes.contains(ppd
                 .getEquivalents(IFactory.TOP_CONCEPT)));
 
-        ClassNode criticalDiseaseNode = ppd.getEquivalents(criticalDisease);
+        ClassNode criticalDiseaseNode = ppd.getEquivalents(criticalDisease
+                .getId());
         Set<ClassNode> criticalDiseaseRes = criticalDiseaseNode.getParents();
         assertTrue(criticalDiseaseRes.size() == 1);
         assertTrue(criticalDiseaseRes.contains(ppd
@@ -201,55 +227,59 @@ public class TestNormalisedOntology {
 
     @Test
     public void testNormalise() {
-        IFactory factory = new Factory();
+        IFactory<String> factory = new Factory<>();
 
         // Add roles
-        int container = factory.getRole("container");
-        int contains = factory.getRole("contains");
+        Role<String> container = new Role<>("container");
+        Role<String> contains = new Role<>("contains");
 
         // Add features
-        int mgPerTablet = factory.getFeature("mgPerTablet");
+        Feature<String> mgPerTablet = new Feature<>("mgPerTablet");
 
         // Add concepts
-        int panadol = factory.getConcept("Panadol");
-        int panadol_250mg = factory.getConcept("Panadol_250mg");
-        int panadol_500mg = factory.getConcept("Panadol_500mg");
-        int panadol_pack_250mg = factory.getConcept("Panadol_pack_250mg");
-        int paracetamol = factory.getConcept("Paracetamol");
-        int bottle = factory.getConcept("Bottle");
+        Concept<String> panadol = new Concept<>("Panadol");
+        Concept<String> panadol_250mg = new Concept<>("Panadol_250mg");
+        Concept<String> panadol_500mg = new Concept<>("Panadol_500mg");
+        Concept<String> panadol_pack_250mg = new Concept<>("Panadol_pack_250mg");
+        Concept<String> paracetamol = new Concept<>("Paracetamol");
+        Concept<String> bottle = new Concept<>("Bottle");
 
         // Add axioms
-        GCI a1 = new GCI(panadol, new Existential(contains, new Concept(
-                paracetamol)));
+        ConceptInclusion a1 = new ConceptInclusion(panadol, new Existential<>(
+                contains, paracetamol));
 
-        GCI a2 = new GCI(panadol_250mg, new Conjunction(new AbstractConcept[] {
-                new Concept(panadol),
-                new Datatype(mgPerTablet, Datatype.OPERATOR_EQUALS,
-                        new IntegerLiteral(250)) }));
+        ConceptInclusion a2 = new ConceptInclusion(panadol_250mg,
+                new Conjunction(new IConcept[] {
+                        panadol,
+                        new Datatype<>(mgPerTablet, Operator.EQUALS,
+                                new IntegerLiteral(250)) }));
 
-        GCI a3 = new GCI(new Conjunction(new AbstractConcept[] {
-                new Concept(panadol),
-                new Datatype(mgPerTablet, Datatype.OPERATOR_EQUALS,
-                        new IntegerLiteral(250)) }), panadol_250mg);
+        ConceptInclusion a3 = new ConceptInclusion(new Conjunction(
+                new IConcept[] {
+                        panadol,
+                        new Datatype<>(mgPerTablet, Operator.EQUALS,
+                                new IntegerLiteral(250)) }), panadol_250mg);
 
-        GCI a4 = new GCI(panadol_500mg, new Conjunction(new AbstractConcept[] {
-                new Concept(panadol),
-                new Datatype(mgPerTablet, Datatype.OPERATOR_EQUALS,
-                        new IntegerLiteral(500)) }));
+        ConceptInclusion a4 = new ConceptInclusion(panadol_500mg,
+                new Conjunction(new IConcept[] {
+                        panadol,
+                        new Datatype<>(mgPerTablet, Operator.EQUALS,
+                                new IntegerLiteral(500)) }));
 
-        GCI a5 = new GCI(new Conjunction(new AbstractConcept[] {
-                new Concept(panadol),
-                new Datatype(mgPerTablet, Datatype.OPERATOR_EQUALS,
-                        new IntegerLiteral(500)) }), panadol_500mg);
+        ConceptInclusion a5 = new ConceptInclusion(new Conjunction(
+                new IConcept[] {
+                        panadol,
+                        new Datatype<>(mgPerTablet, Operator.EQUALS,
+                                new IntegerLiteral(500)) }), panadol_500mg);
 
-        GCI a6 = new GCI(panadol_pack_250mg, new Conjunction(
-                new AbstractConcept[] {
-                        new Concept(panadol),
-                        new Datatype(mgPerTablet, Datatype.OPERATOR_EQUALS,
+        ConceptInclusion a6 = new ConceptInclusion(panadol_pack_250mg,
+                new Conjunction(new IConcept[] {
+                        panadol,
+                        new Datatype<>(mgPerTablet, Operator.EQUALS,
                                 new IntegerLiteral(250)),
-                        new Existential(container, new Concept(bottle)) }));
+                        new Existential<>(container, bottle) }));
 
-        Set<Inclusion> axioms = new HashSet<Inclusion>();
+        Set<IAxiom> axioms = new HashSet<>();
         axioms.add(a1);
         axioms.add(a2);
         axioms.add(a3);
@@ -257,10 +287,10 @@ public class TestNormalisedOntology {
         axioms.add(a5);
         axioms.add(a6);
 
-        NormalisedOntology no = new NormalisedOntology(factory);
-        Set<Inclusion> norms = no.normalise(axioms);
+        NormalisedOntology<String> no = new NormalisedOntology<>(factory);
+        Set<Inclusion<String>> norms = no.normalise(axioms);
 
-        for (Inclusion norm : norms) {
+        for (Inclusion<String> norm : norms) {
             System.out.println(norm.getNormalForm().toString());
         }
 
@@ -293,55 +323,56 @@ public class TestNormalisedOntology {
      */
     @Test
     public void testEndocarditisIncremental() {
-        IFactory factory = new Factory();
+        IFactory<String> factory = new Factory<>();
 
         // Original Endocarditis ontology axioms
-        int contIn = factory.getRole("cont-in");
-        int partOf = factory.getRole("part-of");
-        int hasLoc = factory.getRole("has-loc");
-        int actsOn = factory.getRole("acts-on");
-        int tissue = factory.getConcept("Tissue");
-        int heartWall = factory.getConcept("HeartWall");
-        int heartValve = factory.getConcept("HeartValve");
-        int bodyWall = factory.getConcept("BodyWall");
-        int heart = factory.getConcept("Heart");
-        int bodyValve = factory.getConcept("BodyValve");
-        int inflammation = factory.getConcept("Inflammation");
-        int disease = factory.getConcept("Disease");
-        int heartdisease = factory.getConcept("Heartdisease");
-        int criticalDisease = factory.getConcept("CriticalDisease");
+        Role<String> contIn = new Role<>("cont-in");
+        Role<String> partOf = new Role<>("part-of");
+        Role<String> hasLoc = new Role<>("has-loc");
+        Role<String> actsOn = new Role<>("acts-on");
+        Concept<String> tissue = new Concept<>("Tissue");
+        Concept<String> heartWall = new Concept<>("HeartWall");
+        Concept<String> heartValve = new Concept<>("HeartValve");
+        Concept<String> bodyWall = new Concept<>("BodyWall");
+        Concept<String> heart = new Concept<>("Heart");
+        Concept<String> bodyValve = new Concept<>("BodyValve");
+        Concept<String> inflammation = new Concept<>("Inflammation");
+        Concept<String> disease = new Concept<>("Disease");
+        Concept<String> heartdisease = new Concept<>("Heartdisease");
+        Concept<String> criticalDisease = new Concept<>("CriticalDisease");
 
-        GCI a2 = new GCI(heartWall, new Conjunction(new AbstractConcept[] {
-                new Concept(bodyWall),
-                new Existential(partOf, new Concept(heart)) }));
+        ConceptInclusion a2 = new ConceptInclusion(heartWall, new Conjunction(
+                new IConcept[] { bodyWall,
+                        new Existential<>(partOf, heart) }));
 
-        GCI a3 = new GCI(heartValve, new Conjunction(new AbstractConcept[] {
-                new Concept(bodyValve),
-                new Existential(partOf, new Concept(heart)) }));
+        ConceptInclusion a3 = new ConceptInclusion(heartValve, new Conjunction(
+                new IConcept[] { bodyValve,
+                        new Existential<>(partOf, heart) }));
 
-        GCI a5 = new GCI(inflammation, new Conjunction(new AbstractConcept[] {
-                new Concept(disease),
-                new Existential(actsOn, new Concept(tissue)) }));
+        ConceptInclusion a5 = new ConceptInclusion(inflammation,
+                new Conjunction(new IConcept[] { disease,
+                        new Existential<>(actsOn, tissue) }));
 
-        GCI a6 = new GCI(new Conjunction(new AbstractConcept[] {
-                new Concept(heartdisease),
-                new Existential(hasLoc, new Concept(heartValve)) }),
-                criticalDisease);
+        ConceptInclusion a6 = new ConceptInclusion(new Conjunction(
+                new IConcept[] { heartdisease,
+                        new Existential<>(hasLoc, heartValve) }), criticalDisease);
 
-        GCI a7 = new GCI(heartdisease, new Conjunction(new AbstractConcept[] {
-                new Concept(disease),
-                new Existential(hasLoc, new Concept(heart)) }));
+        ConceptInclusion a7 = new ConceptInclusion(heartdisease,
+                new Conjunction(new IConcept[] { disease,
+                        new Existential<>(hasLoc, heart) }));
 
-        GCI a8 = new GCI(new Conjunction(new AbstractConcept[] {
-                new Concept(disease),
-                new Existential(hasLoc, new Concept(heart)) }), heartdisease);
+        ConceptInclusion a8 = new ConceptInclusion(
+                new Conjunction(new IConcept[] { disease,
+                        new Existential<>(hasLoc, heart) }), heartdisease);
 
-        RI a9 = new RI(new int[] { partOf, partOf }, partOf);
-        RI a10 = new RI(partOf, contIn);
-        RI a11 = new RI(new int[] { hasLoc, contIn }, hasLoc);
+        RoleInclusion a9 = new RoleInclusion(new Role[] { partOf, partOf },
+                partOf);
+        RoleInclusion a10 = new RoleInclusion(partOf, contIn);
+        RoleInclusion a11 = new RoleInclusion(new Role[] { hasLoc, contIn },
+                hasLoc);
 
         // Partial ontology
-        Set<Inclusion> axioms = new HashSet<Inclusion>();
+        Set<IAxiom> axioms = new HashSet<>();
         axioms.add(a2);
         axioms.add(a3);
         axioms.add(a5);
@@ -352,107 +383,113 @@ public class TestNormalisedOntology {
         axioms.add(a10);
         axioms.add(a11);
 
-        NormalisedOntology o = new NormalisedOntology(factory, axioms);
+        NormalisedOntology<String> o = new NormalisedOntology<>(factory, axioms);
         o.classify();
         IConceptMap<IConceptSet> s = o.getSubsumptions();
-        PostProcessedData ppd = new PostProcessedData();
-        ppd.computeDag(factory, s, null);
+        PostProcessedData<String> ppd = new PostProcessedData<>(factory);
+        ppd.computeDag(s, null);
 
         // Add delta axioms and classify incrementally
-        int endocardium = factory.getConcept("Endocardium");
-        int endocarditis = factory.getConcept("Endocarditis");
+        Concept<String> endocardium = new Concept<>("Endocardium");
+        Concept<String> endocarditis = new Concept<>("Endocarditis");
 
-        GCI a1 = new GCI(endocardium, new Conjunction(new AbstractConcept[] {
-                new Concept(tissue),
-                new Existential(contIn, new Concept(heartWall)),
-                new Existential(contIn, new Concept(heartValve)) }));
+        ConceptInclusion a1 = new ConceptInclusion(endocardium,
+                new Conjunction(new IConcept[] { tissue,
+                        new Existential<>(contIn, heartWall),
+                        new Existential<>(contIn, heartValve) }));
 
-        GCI a4 = new GCI(endocarditis, new Conjunction(new AbstractConcept[] {
-                new Concept(inflammation),
-                new Existential(hasLoc, new Concept(endocardium)) }));
+        ConceptInclusion a4 = new ConceptInclusion(endocarditis,
+                new Conjunction(new IConcept[] { inflammation,
+                        new Existential<>(hasLoc, endocardium) }));
 
-        Set<Inclusion> incAxioms = new HashSet<Inclusion>();
+        Set<IAxiom> incAxioms = new HashSet<>();
         incAxioms.add(a1);
         incAxioms.add(a4);
 
         o.classifyIncremental(incAxioms);
         IConceptMap<IConceptSet> ns = o.getNewSubsumptions();
         IConceptMap<IConceptSet> as = o.getAffectedSubsumptions();
-        ppd.computeDagIncremental(factory, ns, as, null);
+        ppd.computeDagIncremental(ns, as, null);
 
         // Test results
         ClassNode bottomNode = ppd.getEquivalents(IFactory.BOTTOM_CONCEPT);
         Set<ClassNode> bottomRes = bottomNode.getParents();
 
         assertTrue(bottomRes.size() == 5);
-        assertTrue(bottomRes.contains(ppd.getEquivalents(endocardium)));
-        assertTrue(bottomRes.contains(ppd.getEquivalents(endocarditis)));
-        assertTrue(bottomRes.contains(ppd.getEquivalents(heartWall)));
-        assertTrue(bottomRes.contains(ppd.getEquivalents(heartValve)));
-        assertTrue(bottomRes.contains(ppd.getEquivalents(heart)));
+        assertTrue(bottomRes.contains(ppd.getEquivalents(endocardium.getId())));
+        assertTrue(bottomRes.contains(ppd.getEquivalents(endocarditis.getId())));
+        assertTrue(bottomRes.contains(ppd.getEquivalents(heartWall.getId())));
+        assertTrue(bottomRes.contains(ppd.getEquivalents(heartValve.getId())));
+        assertTrue(bottomRes.contains(ppd.getEquivalents(heart.getId())));
 
-        ClassNode endocarditisNode = ppd.getEquivalents(endocarditis);
+        ClassNode endocarditisNode = ppd.getEquivalents(endocarditis.getId());
         Set<ClassNode> endocarditisRes = endocarditisNode.getParents();
         assertTrue(endocarditisRes.size() == 3);
-        assertTrue(endocarditisRes.contains(ppd.getEquivalents(inflammation)));
-        assertTrue(endocarditisRes.contains(ppd.getEquivalents(heartdisease)));
-        assertTrue(endocarditisRes
-                .contains(ppd.getEquivalents(criticalDisease)));
+        assertTrue(endocarditisRes.contains(ppd.getEquivalents(inflammation
+                .getId())));
+        assertTrue(endocarditisRes.contains(ppd.getEquivalents(heartdisease
+                .getId())));
+        assertTrue(endocarditisRes.contains(ppd.getEquivalents(criticalDisease
+                .getId())));
 
-        ClassNode inflammationNode = ppd.getEquivalents(inflammation);
+        ClassNode inflammationNode = ppd.getEquivalents(inflammation.getId());
         Set<ClassNode> inflammationRes = inflammationNode.getParents();
         assertTrue(inflammationRes.size() == 1);
-        assertTrue(inflammationRes.contains(ppd.getEquivalents(disease)));
+        assertTrue(inflammationRes
+                .contains(ppd.getEquivalents(disease.getId())));
 
-        ClassNode endocardiumNode = ppd.getEquivalents(endocardium);
+        ClassNode endocardiumNode = ppd.getEquivalents(endocardium.getId());
         Set<ClassNode> endocardiumRes = endocardiumNode.getParents();
         assertTrue(endocardiumRes.size() == 1);
-        assertTrue(endocardiumRes.contains(ppd.getEquivalents(tissue)));
+        assertTrue(endocardiumRes.contains(ppd.getEquivalents(tissue.getId())));
 
-        ClassNode heartdiseaseNode = ppd.getEquivalents(heartdisease);
+        ClassNode heartdiseaseNode = ppd.getEquivalents(heartdisease.getId());
         Set<ClassNode> heartdiseaseRes = heartdiseaseNode.getParents();
         assertTrue(heartdiseaseRes.size() == 1);
-        assertTrue(heartdiseaseRes.contains(ppd.getEquivalents(disease)));
+        assertTrue(heartdiseaseRes
+                .contains(ppd.getEquivalents(disease.getId())));
 
-        ClassNode heartWallNode = ppd.getEquivalents(heartWall);
+        ClassNode heartWallNode = ppd.getEquivalents(heartWall.getId());
         Set<ClassNode> heartWallRes = heartWallNode.getParents();
         assertTrue(heartWallRes.size() == 1);
-        assertTrue(heartWallRes.contains(ppd.getEquivalents(bodyWall)));
+        assertTrue(heartWallRes.contains(ppd.getEquivalents(bodyWall.getId())));
 
-        ClassNode heartValveNode = ppd.getEquivalents(heartValve);
+        ClassNode heartValveNode = ppd.getEquivalents(heartValve.getId());
         Set<ClassNode> heartValveRes = heartValveNode.getParents();
         assertTrue(heartValveRes.size() == 1);
-        assertTrue(heartValveRes.contains(ppd.getEquivalents(bodyValve)));
+        assertTrue(heartValveRes
+                .contains(ppd.getEquivalents(bodyValve.getId())));
 
-        ClassNode diseaseNode = ppd.getEquivalents(disease);
+        ClassNode diseaseNode = ppd.getEquivalents(disease.getId());
         Set<ClassNode> diseaseRes = diseaseNode.getParents();
         assertTrue(diseaseRes.size() == 1);
         assertTrue(diseaseRes
                 .contains(ppd.getEquivalents(IFactory.TOP_CONCEPT)));
 
-        ClassNode tissueNode = ppd.getEquivalents(tissue);
+        ClassNode tissueNode = ppd.getEquivalents(tissue.getId());
         Set<ClassNode> tissueRes = tissueNode.getParents();
         assertTrue(tissueRes.size() == 1);
         assertTrue(tissueRes.contains(ppd.getEquivalents(IFactory.TOP_CONCEPT)));
 
-        ClassNode heartNode = ppd.getEquivalents(heart);
+        ClassNode heartNode = ppd.getEquivalents(heart.getId());
         Set<ClassNode> heartRes = heartNode.getParents();
         assertTrue(heartRes.size() == 1);
         assertTrue(heartRes.contains(ppd.getEquivalents(IFactory.TOP_CONCEPT)));
 
-        ClassNode bodyValveNode = ppd.getEquivalents(bodyValve);
+        ClassNode bodyValveNode = ppd.getEquivalents(bodyValve.getId());
         Set<ClassNode> bodyValveRes = bodyValveNode.getParents();
         assertTrue(bodyValveRes.size() == 1);
         assertTrue(bodyValveRes.contains(ppd
                 .getEquivalents(IFactory.TOP_CONCEPT)));
 
-        ClassNode bodyWallNode = ppd.getEquivalents(bodyWall);
+        ClassNode bodyWallNode = ppd.getEquivalents(bodyWall.getId());
         Set<ClassNode> bodyWallRes = bodyWallNode.getParents();
         assertTrue(bodyWallRes.size() == 1);
         assertTrue(bodyWallRes.contains(ppd
                 .getEquivalents(IFactory.TOP_CONCEPT)));
 
-        ClassNode criticalDiseaseNode = ppd.getEquivalents(criticalDisease);
+        ClassNode criticalDiseaseNode = ppd.getEquivalents(criticalDisease
+                .getId());
         Set<ClassNode> criticalDiseaseRes = criticalDiseaseNode.getParents();
         assertTrue(criticalDiseaseRes.size() == 1);
         assertTrue(criticalDiseaseRes.contains(ppd

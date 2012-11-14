@@ -21,7 +21,6 @@
 
 package au.csiro.snorocket.core;
 
-import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -32,9 +31,17 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import org.apache.log4j.Logger;
+
+import au.csiro.ontology.axioms.IAxiom;
+import au.csiro.ontology.axioms.IConceptInclusion;
+import au.csiro.ontology.axioms.IRoleInclusion;
+import au.csiro.ontology.model.IConcept;
+import au.csiro.ontology.model.ILiteral;
+import au.csiro.ontology.model.INamedRole;
+import au.csiro.ontology.model.IRole;
+import au.csiro.snorocket.core.axioms.GCI;
 import au.csiro.snorocket.core.axioms.IConjunctionQueueEntry;
 import au.csiro.snorocket.core.axioms.IRoleQueueEntry;
 import au.csiro.snorocket.core.axioms.Inclusion;
@@ -48,8 +55,21 @@ import au.csiro.snorocket.core.axioms.NF6;
 import au.csiro.snorocket.core.axioms.NF7;
 import au.csiro.snorocket.core.axioms.NF8;
 import au.csiro.snorocket.core.axioms.NormalFormGCI;
+import au.csiro.snorocket.core.axioms.RI;
 import au.csiro.snorocket.core.concurrent.Context;
 import au.csiro.snorocket.core.concurrent.Worker;
+import au.csiro.snorocket.core.model.AbstractConcept;
+import au.csiro.snorocket.core.model.BooleanLiteral;
+import au.csiro.snorocket.core.model.Concept;
+import au.csiro.snorocket.core.model.Conjunction;
+import au.csiro.snorocket.core.model.Datatype;
+import au.csiro.snorocket.core.model.DateLiteral;
+import au.csiro.snorocket.core.model.DoubleLiteral;
+import au.csiro.snorocket.core.model.Existential;
+import au.csiro.snorocket.core.model.FloatLiteral;
+import au.csiro.snorocket.core.model.IntegerLiteral;
+import au.csiro.snorocket.core.model.LongLiteral;
+import au.csiro.snorocket.core.model.StringLiteral;
 import au.csiro.snorocket.core.util.AxiomSet;
 import au.csiro.snorocket.core.util.DenseConceptMap;
 import au.csiro.snorocket.core.util.FastConceptMap;
@@ -71,18 +91,13 @@ import au.csiro.snorocket.core.util.SparseConceptSet;
  * @author law223
  * 
  */
-public class NormalisedOntology {
+public class NormalisedOntology<T extends Comparable<T>> {
 
-    static final Logger LOGGER = Snorocket.getLogger();
+    // Logger
+    private final static Logger log = Logger.getLogger(
+            NormalisedOntology.class);
 
-    // Increment 3rd place for upwards/backwards compatible change
-    // Increment 2nd place for upwards compatible change
-    // Increment 1st place for incompatible change
-    private static final String FILE_VERSION = "3.0.0";
-
-    final private static int TOP = IFactory.TOP_CONCEPT;
-
-    final protected IFactory factory;
+    final protected IFactory<T> factory;
 
     /**
      * The set of NF1 terms in the ontology
@@ -229,11 +244,11 @@ public class NormalisedOntology {
      * @param factory
      * @param inclusions
      */
-    public NormalisedOntology(final IFactory factory,
-            final Set<? extends Inclusion> inclusions) {
+    public NormalisedOntology(final IFactory<T> factory,
+            final Set<? extends IAxiom> inclusions) {
         this(factory);
-
-        for (Inclusion i : normalise(inclusions)) {
+        
+        for (Inclusion<T> i : normalise(inclusions)) {
             addTerm(i.getNormalForm());
         }
     }
@@ -246,7 +261,7 @@ public class NormalisedOntology {
      *            impacted
      * @param roleCount
      */
-    public NormalisedOntology(final IFactory factory) {
+    public NormalisedOntology(final IFactory<T> factory) {
         this(
                 factory,
                 new DenseConceptMap<MonotonicCollection<IConjunctionQueueEntry>>(
@@ -274,7 +289,7 @@ public class NormalisedOntology {
      * @param nf8q
      */
     protected NormalisedOntology(
-            final IFactory factory,
+            final IFactory<T> factory,
             final IConceptMap<MonotonicCollection<IConjunctionQueueEntry>> nf1q,
             final IConceptMap<MonotonicCollection<NF2>> nf2q,
             final IConceptMap<RoleMap<Collection<IConjunctionQueueEntry>>> nf3q,
@@ -300,34 +315,135 @@ public class NormalisedOntology {
      * 
      * @param inclusions
      */
-    public void loadAxioms(final Set<? extends Inclusion> inclusions) {
-        LOGGER.info("Loading " + inclusions.size() + " axioms");
-        Set<Inclusion> normInclusions = normalise(inclusions);
-        LOGGER.info("Processing " + normInclusions.size()
+    public void loadAxioms(final Set<? extends IAxiom> inclusions) {
+        if(log.isInfoEnabled())
+            log.info("Loading " + inclusions.size() + " axioms");
+        Set<Inclusion<T>> normInclusions = normalise(inclusions);
+        if(log.isInfoEnabled())
+            log.info("Processing " + normInclusions.size()
                 + " normalised axioms");
-        for (Inclusion i : normInclusions) {
+        for (Inclusion<T> i : normInclusions) {
             addTerm(i.getNormalForm());
+        }
+    }
+    
+    /**
+     * Transforms a {@link Set} of {@link AbstractAxiom}s into a {@link Set} of
+     * {@link Inclusion}s.
+     * 
+     * @param axioms The axioms in the ontology model format.
+     * @return The axioms in the internal model format.
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private Set<Inclusion<T>> transformAxiom(final Set<? extends IAxiom> axioms) {
+        Set<Inclusion<T>> res = new HashSet<>();
+        
+        for(IAxiom aa : axioms) {
+            if(aa instanceof IConceptInclusion) {
+                IConceptInclusion ci = (IConceptInclusion)aa;
+                IConcept lhs = ci.lhs();
+                IConcept rhs = ci.rhs();
+                res.add(new GCI<T>(transformConcept(lhs), transformConcept(rhs)));
+            } else if(aa instanceof IRoleInclusion) {
+                IRoleInclusion ri = (IRoleInclusion)aa;
+                IRole[] lh = ri.lhs();
+                INamedRole[] lhs = new INamedRole[lh.length];
+                for(int i = 0; i < lh.length; i++) {
+                    lhs[i] = (INamedRole)lh[i];
+                }
+                INamedRole rhs = (INamedRole)ri.rhs();
+                int[] lhsInt = new int[lhs.length];
+                for(int i = 0; i < lhsInt.length; i++) {
+                    lhsInt[i] = factory.getRole(lhs[i].getId());
+                }
+                res.add(new RI(lhsInt, factory.getRole(rhs.getId())));
+            }
+        }
+        
+        return res;
+    }
+    
+    /**
+     * Transforms an {@link AbstractConcept} into an 
+     * {@link au.csiro.snorocket.core.model.AbstractConcept}.
+     * 
+     * @param c The concept in the ontology model format.
+     * @return The concept in the internal model format.
+     */
+    @SuppressWarnings("unchecked")
+    private au.csiro.snorocket.core.model.AbstractConcept transformConcept(IConcept c) {
+        if(c == au.csiro.ontology.model.Concept.TOP) {
+            return new Concept(IFactory.TOP_CONCEPT);
+        } else if(c == au.csiro.ontology.model.Concept.BOTTOM) {
+            return new Concept(IFactory.BOTTOM_CONCEPT);
+        } else if(c instanceof au.csiro.ontology.model.Concept) {
+            return new Concept(factory.getConcept(((au.csiro.ontology.model.Concept<T>)c).getId()));
+        } else if(c instanceof au.csiro.ontology.model.Conjunction) {
+            IConcept[] modelCons = ((au.csiro.ontology.model.Conjunction)c).getConcepts();
+            au.csiro.snorocket.core.model.AbstractConcept[] cons = 
+                    new au.csiro.snorocket.core.model.AbstractConcept[modelCons.length];
+            for(int i = 0; i < modelCons.length; i++) {
+                cons[i] = transformConcept(modelCons[i]);
+            }
+            return new Conjunction(cons);
+        } else if(c instanceof au.csiro.ontology.model.Datatype) {
+            au.csiro.ontology.model.Datatype<T> dt = (au.csiro.ontology.model.Datatype<T>) c;
+            return new Datatype(factory.getFeature(dt.getFeature().getId()), 
+                    dt.getOperator(), transformLiteral(dt.getLiteral()));
+        } else if(c instanceof au.csiro.ontology.model.Existential) {
+            au.csiro.ontology.model.Existential<T> e = (au.csiro.ontology.model.Existential<T>) c;
+            return new Existential(factory.getRole(e.getRole().getId()), 
+                    transformConcept(e.getConcept())); 
+        } else {
+            throw new RuntimeException("Unexpected AbstractConcept "+c.getClass().getName());
+        }
+    }
+    
+    /**
+     * Transforms an {@link ILiteral} into an 
+     * {@link au.csiro.snorocket.core.model.AbstractLiteral}.
+     * 
+     * @param l The literal in the ontology model format.
+     * @return The literal in the internal model format.
+     */
+    private au.csiro.snorocket.core.model.AbstractLiteral transformLiteral(ILiteral l) {
+        if(l instanceof au.csiro.ontology.model.BooleanLiteral) {
+            return new BooleanLiteral(((au.csiro.ontology.model.BooleanLiteral) l).getValue());
+        } else if(l instanceof au.csiro.ontology.model.DateLiteral) {
+            return new DateLiteral(((au.csiro.ontology.model.DateLiteral) l).getValue());
+        } else if(l instanceof au.csiro.ontology.model.DoubleLiteral) {
+            return new DoubleLiteral(((au.csiro.ontology.model.DoubleLiteral) l).getValue());
+        } else if(l instanceof au.csiro.ontology.model.FloatLiteral) {
+            return new FloatLiteral(((au.csiro.ontology.model.FloatLiteral) l).getValue());
+        } else if(l instanceof au.csiro.ontology.model.IntegerLiteral) {
+            return new IntegerLiteral(((au.csiro.ontology.model.IntegerLiteral) l).getValue());
+        } else if(l instanceof au.csiro.ontology.model.LongLiteral) {
+            return new LongLiteral(((au.csiro.ontology.model.LongLiteral) l).getValue());
+        } else if(l instanceof au.csiro.ontology.model.StringLiteral) {
+            return new StringLiteral(((au.csiro.ontology.model.StringLiteral) l).getValue());
+        } else {
+            throw new RuntimeException("Unexpected AbstractLiteral "+l.getClass().getName());
         }
     }
 
     /**
      * Returns a set of Inclusions in normal form suitable for classifying.
      */
-    public Set<Inclusion> normalise(final Set<? extends Inclusion> inclusions) {
+    public Set<Inclusion<T>> normalise(final Set<? extends IAxiom> inclusions) {
 
         // Exhaustively apply NF1 to NF4
-        final Set<Inclusion> done = new HashSet<Inclusion>();
-        Set<Inclusion> oldIs = new HashSet<Inclusion>();
-        Set<Inclusion> newIs = new HashSet<Inclusion>(inclusions);
+        final Set<Inclusion<T>> done = new HashSet<>();
+        Set<Inclusion<T>> oldIs = new HashSet<>();
+        Set<Inclusion<T>> newIs = transformAxiom(inclusions);
 
         do {
-            final Set<Inclusion> tmp = oldIs;
+            final Set<Inclusion<T>> tmp = oldIs;
             oldIs = newIs;
             newIs = tmp;
             newIs.clear();
 
-            for (Inclusion i : oldIs) {
-                Inclusion[] s = i.normalise1(factory);
+            for (Inclusion<T> i : oldIs) {
+                Inclusion<T>[] s = i.normalise1(factory);
                 if (null != s) {
                     for (int j = 0; j < s.length; j++) {
                         if (null != s[j]) {
@@ -345,13 +461,13 @@ public class NormalisedOntology {
 
         // Then exhaustively apply NF5 to NF7
         do {
-            final Set<Inclusion> tmp = oldIs;
+            final Set<Inclusion<T>> tmp = oldIs;
             oldIs = newIs;
             newIs = tmp;
             newIs.clear();
 
-            for (Inclusion i : oldIs) {
-                Inclusion[] s = i.normalise2(factory);
+            for (Inclusion<T> i : oldIs) {
+                Inclusion<T>[] s = i.normalise2(factory);
                 if (null != s) {
                     for (int j = 0; j < s.length; j++) {
                         if (null != s[j]) {
@@ -502,26 +618,26 @@ public class NormalisedOntology {
      * 
      * @return
      */
-    public void classifyIncremental(Set<Inclusion> incAxioms) {
+    public void classifyIncremental(Set<IAxiom> incAxioms) {
         // Clear any state from previous incremental classifications
         newContexts.clear();
         affectedContexts.clear();
 
         // Normalise axioms
-        Set<Inclusion> inclusions = normalise(incAxioms);
+        Set<Inclusion<T>> inclusions = normalise(incAxioms);
 
         // Add new axioms to corresponding normal form
         AxiomSet as = new AxiomSet();
         int numNewConcepts = 0;
 
-        for (Inclusion i : inclusions) {
+        for (Inclusion<T> i : inclusions) {
             NormalFormGCI nf = i.getNormalForm();
             as.addAxiom(nf);
             addTerm(nf);
         }
 
         // Determine which contexts are affected
-        for (Inclusion i : inclusions) {
+        for (Inclusion<T> i : inclusions) {
             NormalFormGCI nf = i.getNormalForm();
 
             // Add a context to the context index for every new concept in the
@@ -536,8 +652,8 @@ public class NormalisedOntology {
                     if (c.activate()) {
                         todo.add(c);
                     }
-                    if (LOGGER.isLoggable(Level.FINE)) {
-                        LOGGER.fine("Added context " + c);
+                    if (log.isTraceEnabled()) {
+                        log.trace("Added context " + c);
                     }
 
                     // Keep track of the newly added contexts
@@ -546,9 +662,10 @@ public class NormalisedOntology {
                 }
             }
         }
-
-        LOGGER.info("Added " + numNewConcepts
-                + " new concepts to the ontology.");
+        
+        if(log.isInfoEnabled()) 
+            log.info("Added " + numNewConcepts + 
+                    " new concepts to the ontology.");
 
         // TODO: this is potentially slow
         IConceptMap<IConceptSet> subsumptions = getSubsumptions();
@@ -564,10 +681,12 @@ public class NormalisedOntology {
 
         // Classify
         int numThreads = Runtime.getRuntime().availableProcessors();
-        LOGGER.log(Level.INFO, "Classifying incrementally with " + numThreads
-                + " threads");
-
-        LOGGER.log(Level.INFO, "Running saturation");
+        if(log.isInfoEnabled())
+            log.info("Classifying incrementally with " + numThreads + 
+                    " threads");
+        
+        if(log.isInfoEnabled())
+            log.info("Running saturation");
         ExecutorService executor = Executors.newFixedThreadPool(numThreads);
         for (int j = 0; j < numThreads; j++) {
             Runnable worker = new Worker(todo);
@@ -592,9 +711,8 @@ public class NormalisedOntology {
 
         affectedContexts.removeAll(newContexts);
 
-        if (LOGGER.isLoggable(Level.FINE)) {
-            LOGGER.fine("Processed " + contextIndex.size() + " contexts");
-        }
+        if(log.isTraceEnabled())
+            log.trace("Processed " + contextIndex.size() + " contexts");
     }
 
     /**
@@ -621,7 +739,8 @@ public class NormalisedOntology {
         int size = as.getNf1aAxioms().size() + as.getNf1bAxioms().size();
         if (size == 0)
             return;
-        IConceptMap<MonotonicCollection<IConjunctionQueueEntry>> deltaNF1 = new SparseConceptMap<MonotonicCollection<IConjunctionQueueEntry>>(
+        IConceptMap<MonotonicCollection<IConjunctionQueueEntry>> deltaNF1 = 
+                new SparseConceptMap<MonotonicCollection<IConjunctionQueueEntry>>(
                 size);
         for (NF1a nf1a : as.getNf1aAxioms()) {
             IConjunctionQueueEntry qe = nf1a.getQueueEntry();
@@ -988,7 +1107,8 @@ public class NormalisedOntology {
      */
     public void classify() {
         int numThreads = Runtime.getRuntime().availableProcessors();
-        LOGGER.log(Level.INFO, "Classifying with " + numThreads + " threads");
+        if(log.isInfoEnabled())
+            log.info("Classifying with " + numThreads + " threads");
 
         Context.init(NormalisedOntology.this);
 
@@ -1000,12 +1120,13 @@ public class NormalisedOntology {
             if (c.activate()) {
                 todo.add(c);
             }
-            if (LOGGER.isLoggable(Level.FINE)) {
-                LOGGER.fine("Added context " + c);
+            if(log.isTraceEnabled()) {
+                log.trace("Added context " + c);
             }
         }
-
-        LOGGER.log(Level.INFO, "Running saturation");
+        
+        if(log.isInfoEnabled())
+            log.info("Running saturation");
         ExecutorService executor = Executors.newFixedThreadPool(numThreads);
         for (int j = 0; j < numThreads; j++) {
             Runnable worker = new Worker(todo);
@@ -1023,8 +1144,8 @@ public class NormalisedOntology {
 
         assert (todo.isEmpty());
 
-        if (LOGGER.isLoggable(Level.FINE)) {
-            LOGGER.fine("Processed " + contextIndex.size() + " contexts");
+        if (log.isTraceEnabled()) {
+            log.trace("Processed " + contextIndex.size() + " contexts");
         }
     }
 
@@ -1121,85 +1242,7 @@ public class NormalisedOntology {
         return count;
     }
 
-    /**
-     * 
-     * @param writer
-     */
-    protected void printClassification(final PrintWriter writer) {
-        // must print factory state first
-        factory.printAll(writer);
-
-        writer.println(FILE_VERSION);
-
-        // print ontology rules
-        writer.println("Rules--------");
-        for (final IntIterator itr = ontologyNF1.keyIterator(); itr.hasNext();) {
-            final int a = itr.next();
-            MonotonicCollection<IConjunctionQueueEntry> entries = ontologyNF1
-                    .get(a);
-            for (final IConjunctionQueueEntry entry : entries) {
-                writer.print(a + "\t=>");
-                writer.print("\t" + entry.getB());
-                if (entry.getBi() > TOP) {
-                    writer.print("\t" + entry.getBi());
-                }
-                writer.println();
-            }
-        }
-        writer.println("--------");
-
-        for (final IntIterator itr = ontologyNF2.keyIterator(); itr.hasNext();) {
-            final int a = itr.next();
-            MonotonicCollection<NF2> entries = ontologyNF2.get(a);
-            for (final NF2 entry : entries) {
-                writer.print(a + "\t=>");
-                writer.print("\t" + entry.getR());
-                writer.print("\t" + entry.getB());
-                writer.println();
-            }
-        }
-        writer.println("--------");
-
-        for (final IntIterator itr = ontologyNF3.keyIterator(); itr.hasNext();) {
-            final int a = itr.next();
-            RoleMap<Collection<IConjunctionQueueEntry>> map = ontologyNF3
-                    .get(a);
-            for (int r = 0; r < factory.getTotalRoles(); r++) {
-                if (map.containsKey(r)) {
-                    final Collection<IConjunctionQueueEntry> entries = map
-                            .get(r);
-                    for (IConjunctionQueueEntry entry : entries) {
-                        writer.print(a + "\t" + r + "\t=>");
-                        writer.print("\t" + entry.getB());
-                        if (entry.getBi() > TOP) {
-                            writer.print("\t" + entry.getBi());
-                        }
-                        writer.println();
-                    }
-                }
-            }
-        }
-        writer.println("--------");
-
-        for (NF4 nf : ontologyNF4) {
-            writer.println(nf.getR() + "\t" + nf.getS());
-        }
-        writer.println("--------");
-
-        for (NF5 nf : ontologyNF5) {
-            writer.println(nf.getR() + "\t" + nf.getS() + "\t" + nf.getT());
-        }
-        writer.println("--------");
-
-        for (IntIterator itr = reflexiveRoles.iterator(); itr.hasNext();) {
-            final int role = itr.next();
-            writer.println(role);
-        }
-        writer.println("--------");
-
-    }
-
-    public IFactory getFactory() {
+    public IFactory<T> getFactory() {
         return factory;
     }
 

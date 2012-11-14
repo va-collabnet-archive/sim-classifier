@@ -16,9 +16,9 @@
  -->
 
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>snorocket-core</artifactId>
+  <artifactId>snorocket-protege</artifactId>
   <packaging>jar</packaging>
-  <name>Snorocket Classifier Implementation</name>
+  <name>Snorocket Protege Plugin</name>
 
   <parent>
     <groupId>au.csiro</groupId>
@@ -29,9 +29,39 @@
   
   <dependencies>
     <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>snorocket-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>au.csiro</groupId>
       <artifactId>ontology-model</artifactId>
       <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>au.csiro</groupId>
+      <artifactId>ontology-import</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sourceforge.owlapi</groupId>
+      <artifactId>owlapi-api</artifactId>
+      <version>3.3</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sourceforge.owlapi</groupId>
+      <artifactId>owlapi-apibinding</artifactId>
+      <version>3.3</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sourceforge.owlapi</groupId>
+      <artifactId>owlapi-reasoner</artifactId>
+      <version>3.3</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sourceforge.owlapi</groupId>
+      <artifactId>owlapi-mansyntax</artifactId>
+      <version>3.3</version>
     </dependency>
     <dependency>
 	  <groupId>log4j</groupId>
@@ -39,34 +69,5 @@
 	  <version>1.2.16</version>
 	</dependency>
   </dependencies>
-  <build>
-    <plugins>
-	  <plugin>
-		<groupId>org.jacoco</groupId>
-		<artifactId>jacoco-maven-plugin</artifactId>
-		<version>0.6.0.201210061924</version>
-		<configuration>
-		  <destFile>${basedir}/../target/jacoco-all.exec</destFile>
-		  <append>true</append>
-		  <dataFile>${basedir}/../target/jacoco-all.exec</dataFile>
-		  <outputDirectory>${basedir}/../target/jacoco_core</outputDirectory>
-		</configuration>
-		<executions>
-		  <execution>
-		    <goals>
-			  <goal>prepare-agent</goal>
-			</goals>
-		  </execution>
-		  <execution>
-		    <id>report</id>
-			<phase>package</phase>
-			<goals>
-			  <goal>report</goal>
-			</goals>
-		  </execution>
-		</executions>
-	  </plugin>
-	</plugins>
-  </build>
 </project>
 
