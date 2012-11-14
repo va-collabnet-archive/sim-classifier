@@ -26,9 +26,9 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
 
-import org.semanticweb.owlapi.reasoner.NullReasonerProgressMonitor;
-import org.semanticweb.owlapi.reasoner.ReasonerProgressMonitor;
-
+import au.csiro.ontology.classification.IProgressMonitor;
+import au.csiro.ontology.classification.NullProgressMonitor;
+import au.csiro.ontology.model.Concept;
 import au.csiro.snorocket.core.util.DenseConceptMap;
 import au.csiro.snorocket.core.util.IConceptMap;
 import au.csiro.snorocket.core.util.IConceptSet;
@@ -44,15 +44,17 @@ import au.csiro.snorocket.core.util.SparseConceptMap;
  * @author Alejandro Metke
  * 
  */
-public class PostProcessedData {
+public class PostProcessedData<T> {
 
     // private static final Logger LOGGER = Snorocket.getLogger();
 
     // Map of concepts to the node in the resulting taxonomy
     private IConceptMap<ClassNode> conceptNodeIndex;
+    
+    private final IFactory<T> factory;
 
-    public PostProcessedData() {
-
+    public PostProcessedData(IFactory<T> factory) {
+        this.factory = factory;
     }
 
     /**
@@ -85,16 +87,14 @@ public class PostProcessedData {
      * Computes an incremental DAG based on the subsumptions for concepts in the
      * new axioms.
      * 
-     * @param factory
-     *            The factory.
-     * @param subsumptions
-     *            The subsumptions for the new or modified concepts only.
+     * @param newConceptSubs
+     * @param affectedConceptSubs
      * @param monitor
      */
-    public void computeDagIncremental(final IFactory factory,
+    public void computeDagIncremental(
             final IConceptMap<IConceptSet> newConceptSubs,
             final IConceptMap<IConceptSet> affectedConceptSubs,
-            ReasonerProgressMonitor monitor) {
+            IProgressMonitor monitor) {
 
         // 1. Keep only the subsumptions that involve real atomic concepts
         IConceptMap<IConceptSet> allNew = new SparseConceptMap<IConceptSet>(
@@ -347,11 +347,11 @@ public class PostProcessedData {
         }
     }
 
-    public void computeDag(final IFactory factory,
+    public void computeDag(
             final IConceptMap<IConceptSet> subsumptions,
-            ReasonerProgressMonitor monitor) {
+            IProgressMonitor monitor) {
         if (monitor == null)
-            monitor = new NullReasonerProgressMonitor();
+            monitor = new NullProgressMonitor();
         conceptNodeIndex = new DenseConceptMap<>(factory.getTotalConcepts());
 
         // Keep only the subsumptions that involve real atomic concepts
@@ -417,7 +417,7 @@ public class PostProcessedData {
                 }
 
                 workDone++;
-                monitor.reasonerTaskProgressChanged(workDone, totalWork);
+                monitor.step(workDone, totalWork);
             }
         }
 
@@ -431,8 +431,8 @@ public class PostProcessedData {
             addToSet(equiv, topConcept, topConcept);
         }
 
-        monitor.reasonerTaskStopped();
-        monitor.reasonerTaskStarted("Building taxonomy");
+        monitor.taskEnded();
+        monitor.taskStarted("Building taxonomy");
 
         totalWork = (conceptNodeIndex.size() * 3) + equiv.size();
         workDone = 0;
@@ -471,7 +471,7 @@ public class PostProcessedData {
             }
 
             totalWork++;
-            monitor.reasonerTaskProgressChanged(workDone, totalWork);
+            monitor.step(workDone, totalWork);
         }
 
         // Connect the nodes according to the direct super-concept relationships
@@ -499,7 +499,7 @@ public class PostProcessedData {
                 }
             }
             totalWork++;
-            monitor.reasonerTaskProgressChanged(workDone, totalWork);
+            monitor.step(workDone, totalWork);
         }
         processed = null;
 
@@ -522,7 +522,7 @@ public class PostProcessedData {
                 node.getChildren().add(bottom);
             }
             totalWork++;
-            monitor.reasonerTaskProgressChanged(workDone, totalWork);
+            monitor.step(workDone, totalWork);
         }
 
         // Add top
@@ -542,7 +542,7 @@ public class PostProcessedData {
                 top.getChildren().add(node);
             }
             totalWork++;
-            monitor.reasonerTaskProgressChanged(workDone, totalWork);
+            monitor.step(workDone, totalWork);
         }
 
         equiv = null;
@@ -550,17 +550,17 @@ public class PostProcessedData {
 
         // TODO: deal with special case where only top and bottom are present.
 
-        monitor.reasonerTaskStopped();
+        monitor.taskEnded();
     }
 
-    public void computeDeltaDag(final IFactory factory,
+    public void computeDeltaDag(final IFactory<T> factory,
             final IConceptMap<IConceptSet> subsumptions,
             final IConceptMap<IConceptSet> baseSubsumptions,
-            ReasonerProgressMonitor monitor) {
+            IProgressMonitor monitor) {
         // TODO: implement - used by SNAPI
     }
 
-    public IConceptMap<IConceptSet> getParents(final IFactory factory) {
+    public IConceptMap<IConceptSet> getParents(final IFactory<T> factory) {
         IConceptMap<IConceptSet> res = new DenseConceptMap<IConceptSet>(
                 factory.getTotalConcepts());
         for (IntIterator it = getConceptIterator(); it.hasNext();) {
@@ -587,6 +587,17 @@ public class PostProcessedData {
 
     public ClassNode getEquivalents(int concept) {
         return conceptNodeIndex.get(concept);
+    }
+    
+    public ClassNode getEquivalents(Object concept) {
+        // Special cases
+        if(concept == Concept.TOP) {
+            return conceptNodeIndex.get(0);
+        } else if(concept == Concept.BOTTOM) {
+            return conceptNodeIndex.get(1);
+        } else {
+            return conceptNodeIndex.get(factory.getConcept(concept));
+        }
     }
 
     public IntIterator getConceptIterator() {
@@ -679,6 +690,7 @@ public class PostProcessedData {
             return result;
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public boolean equals(Object obj) {
             if (this == obj)
@@ -703,7 +715,7 @@ public class PostProcessedData {
             return true;
         }
 
-        private PostProcessedData getOuterType() {
+        private PostProcessedData<T> getOuterType() {
             return PostProcessedData.this;
         }
     }

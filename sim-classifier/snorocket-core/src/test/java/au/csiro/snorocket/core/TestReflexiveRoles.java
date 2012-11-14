@@ -36,8 +36,8 @@ public class TestReflexiveRoles {
 
     @Test
     public void testPartWhole() {
-        IFactory factory = new Factory();
-        NormalisedOntology o = new NormalisedOntology(factory);
+        IFactory<String> factory = new Factory<>();
+        NormalisedOntology<String> o = new NormalisedOntology<>(factory);
 
         // roles
         int partOf = factory.getRole("part-of");
@@ -61,10 +61,10 @@ public class TestReflexiveRoles {
         o.addTerm(NF2.getInstance(intestine, partOf, gastroTract));
         o.addTerm(NF2.getInstance(stomach, partOf, gastroTract));
 
-        int allParts = factory
-                .getConcept("|All anatomical parts of the gastrointestinal tract|");
-        int allPartsOrWhole = factory
-                .getConcept("|All anatomical parts or whole of the gastrointestinal tract|");
+        int allParts = factory.getConcept(
+                "|All anatomical parts of the gastrointestinal tract|");
+        int allPartsOrWhole = factory.getConcept(
+                "|All anatomical parts or whole of the gastrointestinal tract|");
 
         // allParts == partOf.gastroTract
         o.addTerm(NF2.getInstance(allParts, partOf, gastroTract));
@@ -92,8 +92,8 @@ public class TestReflexiveRoles {
     @Ignore
     @Test
     public void simpleReflexive() {
-        IFactory factory = new Factory();
-        NormalisedOntology o = new NormalisedOntology(factory);
+        IFactory<String> factory = new Factory<>();
+        NormalisedOntology<String> o = new NormalisedOntology<>(factory);
 
         // roles
         int partOf = factory.getRole("partOf");
@@ -110,15 +110,10 @@ public class TestReflexiveRoles {
         int yy = factory.getConcept("YY");
 
         // relationships
-
         o.addTerm(NF2.getInstance(foot, subPart, lowerLeg));
         o.addTerm(NF2.getInstance(xx, partOf, yy));
         o.addTerm(NF1a.getInstance(lowerLeg, bodyPart));
         o.addTerm(NF1a.getInstance(foot, bodyPart));
-
-        final IConceptMap<IConceptSet> s = o.getSubsumptions();
-
-        printAll(factory, s);
 
         final R r = o.getRelationships();
 
@@ -135,21 +130,19 @@ public class TestReflexiveRoles {
         }
     }
 
-    private int printAll(IFactory factory, final IConceptMap<IConceptSet> s) {
+    private int printAll(IFactory<String> factory, final IConceptMap<IConceptSet> s) {
         int count = 0;
         for (final IntIterator keyItr = s.keyIterator(); keyItr.hasNext();) {
             final int key = keyItr.next();
 
-            System.out.print(factory.lookupConceptId(key) + " :");
+            //System.out.print(factory.lookupConceptId(key) + " :");
             for (final IntIterator valItr = s.get(key).iterator(); valItr
                     .hasNext();) {
-                final int val = valItr.next();
+                valItr.next();
 
-                System.out.print(" " + factory.lookupConceptId(val));
+                //System.out.print(" " + factory.lookupConceptId(val));
                 count++;
             }
-
-            System.out.println();
         }
 
         return count;
