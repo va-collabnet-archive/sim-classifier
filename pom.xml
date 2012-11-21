@@ -70,7 +70,21 @@
 	      <target>1.7</target>
 	    </configuration>
 	  </plugin>
+	  <plugin>
+	    <groupId>org.apache.maven.plugins</groupId>
+	    <artifactId>maven-release-plugin</artifactId>
+	    <version>2.3.2</version>
+	    <configuration>
+              <autoVersionSubmodules>true</autoVersionSubmodules>
+              <preparationGoals>clean validate</preparationGoals>
+	    </configuration>
+	  </plugin>
 	</plugins>
   </build>
   
+  <scm>
+    <connection>scm:svn:https://csfe.aceworkspace.net/svn/repos/sim-classifier/trunk/ontology-core</connection>
+    <developerConnection>scm:svn:https://csfe.aceworkspace.net/svn/repos/sim-classifier/trunk/ontology-core</developerConnection>
+    <url>https://csfe.aceworkspace.net/integration/viewvc/viewvc.cgi/trunk/ontology-core/?root=sim-classifier&system=exsy1002</url>
+  </scm>
 </project>
