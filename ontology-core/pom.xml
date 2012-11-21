@@ -85,6 +85,6 @@
   <scm>
     <connection>scm:svn:https://csfe.aceworkspace.net/svn/repos/sim-classifier/trunk/ontology-core</connection>
     <developerConnection>scm:svn:https://csfe.aceworkspace.net/svn/repos/sim-classifier/trunk/ontology-core</developerConnection>
-    <url>https://csfe.aceworkspace.net/integration/viewvc/viewvc.cgi/trunk/ontology-core/?root=sim-classifier&system=exsy1002</url>
+    <url>https://csfe.aceworkspace.net/integration/viewvc/viewvc.cgi/trunk/ontology-core/?root=sim-classifier&amp;system=exsy1002</url>
   </scm>
 </project>
