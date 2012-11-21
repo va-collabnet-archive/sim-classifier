@@ -34,12 +34,17 @@
 		</dependency>
 	</dependencies>
 	
-	<distributionManagement>
-	  <repository>
-	    <id>ssh-repository</id>
-	    <url>scp://ict-ehrclf-cbr.vm.csiro.au/srv/aehrc.com/maven2</url>
-	  </repository>
-   </distributionManagement>
+  <!-- Temporary until we set up a parent POM -->
+  <distributionManagement>
+    <repository>
+      <id>maestro-deploy</id>
+      <url>https://va.maestrodev.com/archiva/repository/sim-releases</url>
+    </repository>
+    <snapshotRepository>
+      <id>ssh-repository</id>
+      <url>scp://ict-ehrclf-cbr.vm.csiro.au/srv/aehrc.com/maven2</url>
+    </snapshotRepository>
+  </distributionManagement>
 
   <repositories>
     <repository>
