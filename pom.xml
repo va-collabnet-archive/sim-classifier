@@ -29,7 +29,6 @@
 	<modules>
 		<module>snorocket-core</module>
 		<module>snorocket-protege</module>
-		<module>snorocket-tests</module>
 		<module>snorocket-benchmark</module>
 	</modules>
 	<dependencies>
