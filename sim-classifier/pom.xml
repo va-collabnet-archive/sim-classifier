@@ -19,12 +19,12 @@
 	<groupId>au.csiro</groupId>
 	<artifactId>snorocket-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>1.4.0-uat-build-interation-2</version>
+	<version>1.4.0-SNAPSHOT</version>
 	<name>IHTSDO Classifier (based on Snorocket) Parent POM</name>
 	<scm>
-		<connection>scm:svn:https://csfe.aceworkspace.net/svn/repos/sim-classifier/tags/uat-build-iteration-2</connection>
-		<developerConnection>scm:svn:https://csfe.aceworkspace.net/svn/repos/sim-classifier/tags/uat-build-iteration-2</developerConnection>
-		<url>https://csfe.aceworkspace.net/svn/repos/sim-classifier/tags/uat-build-iteration-2</url>
+		<connection>scm:svn:https://csfe.aceworkspace.net/svn/repos/sim-classifier/trunk/sim-classifier</connection>
+		<developerConnection>scm:svn:https://csfe.aceworkspace.net/svn/repos/sim-classifier/trunk/sim-classifier</developerConnection>
+		<url>https://csfe.aceworkspace.net/svn/repos/sim-classifier/trunk/sim-classifier</url>
 	</scm>
 	<modules>
 		<module>snorocket-core</module>
