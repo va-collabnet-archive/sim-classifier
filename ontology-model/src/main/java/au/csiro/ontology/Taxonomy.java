@@ -11,6 +11,7 @@ import java.util.Map;
  * Represents a taxonomy generated after classifying an {@link Ontology}.
  * 
  * @author Alejandro Metke
+ * @deprecated Use {@link IOntology} instead.
  *
  */
 public class Taxonomy<T> {
