@@ -6,7 +6,9 @@ package au.csiro.ontology.importer.rf2;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -21,6 +23,7 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.zip.GZIPInputStream;
 
 import au.csiro.ontology.IOntology;
 import au.csiro.ontology.Ontology;
@@ -48,11 +51,6 @@ import au.csiro.ontology.snomed.refset.rf2.IModuleDependencyRefset;
  * 
  */
 public class RF2Importer implements IImporter {
-    
-    /**
-     * Prefix prepended to roor module ids to create the ontology identifier.
-     */
-    public static final String URI_PREFIX = "snomed/sct/";
 
     /**
      * Indicates the type of SNOMED release.
@@ -412,14 +410,14 @@ public class RF2Importer implements IImporter {
                     }
                 }
                 
-                Map<String, IOntology<String>> ontVersions = res.get(
-                        URI_PREFIX+modId);
+                Map<String, IOntology<String>> ontVersions = res.get(modId);
                 if(ontVersions == null) {
                     ontVersions = new HashMap<>();
-                    res.put(URI_PREFIX+modId, ontVersions);
+                    res.put(modId, ontVersions);
                 }
                 
-                ontVersions.put(version, new Ontology<String>(axioms));
+                ontVersions.put(version, new Ontology<String>(axioms, null, 
+                        null));
             }
         }
 
@@ -438,7 +436,12 @@ public class RF2Importer implements IImporter {
         List<ConceptRow> crs = new ArrayList<>();
         BufferedReader br = null;
         try {
-            br = new BufferedReader(new FileReader(conceptsFile));
+            if(conceptsFile.getName().endsWith(".gz")) {
+                br = new BufferedReader(new InputStreamReader(
+                        new GZIPInputStream(new FileInputStream(conceptsFile))));
+            } else {
+                br = new BufferedReader(new FileReader(conceptsFile));
+            }
             String line = br.readLine(); // Skip first line
 
             while (null != (line = br.readLine())) {
@@ -495,7 +498,13 @@ public class RF2Importer implements IImporter {
         // Read all the relationships from the raw data
         List<RelationshipRow> rrs = new ArrayList<>();
         try {
-            br = new BufferedReader(new FileReader(relationshipsFile));
+            if(relationshipsFile.getName().endsWith(".gz")) {
+                br = new BufferedReader(new InputStreamReader(
+                        new GZIPInputStream(
+                                new FileInputStream(relationshipsFile)))); 
+            } else {
+                br = new BufferedReader(new FileReader(relationshipsFile));
+            }
             String line = br.readLine(); // Skip first line
             while (null != (line = br.readLine())) {
                 if (line.trim().length() < 1) {
