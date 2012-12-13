@@ -119,7 +119,8 @@ public class Ontology<T extends Comparable<T>> implements IOntology<T> {
     
     @Override
     public Iterator<Node<T>> nodeIterator() {
-        return nodeMap.values().iterator();
+        Set<Node<T>> set = new HashSet<>(nodeMap.values());
+        return set.iterator();
     }
 
     @Override
@@ -131,6 +132,18 @@ public class Ontology<T extends Comparable<T>> implements IOntology<T> {
     public Set<IAxiom> getDefiningAxioms(T c,
             au.csiro.ontology.IOntology.AxiomForm form) {
         return getDefiningAxioms(new Concept<T>(c), form);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Node<T> getTopNode() {
+        return getNode((T)Concept.TOP);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Node<T> getBottomNode() {
+        return getNode((T)Concept.BOTTOM);
     }
     
 }
