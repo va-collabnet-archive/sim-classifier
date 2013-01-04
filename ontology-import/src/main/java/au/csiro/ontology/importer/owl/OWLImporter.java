@@ -7,6 +7,7 @@ package au.csiro.ontology.importer.owl;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.EmptyStackException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -33,6 +34,7 @@ import org.semanticweb.owlapi.model.OWLDataPropertyRangeAxiom;
 import org.semanticweb.owlapi.model.OWLDataRange;
 import org.semanticweb.owlapi.model.OWLDataSomeValuesFrom;
 import org.semanticweb.owlapi.model.OWLDatatype;
+import org.semanticweb.owlapi.model.OWLDatatypeRestriction;
 import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
 import org.semanticweb.owlapi.model.OWLDisjointClassesAxiom;
 import org.semanticweb.owlapi.model.OWLEntity;
@@ -83,6 +85,7 @@ import au.csiro.ontology.model.LongLiteral;
 import au.csiro.ontology.model.Operator;
 import au.csiro.ontology.model.Role;
 import au.csiro.ontology.model.StringLiteral;
+import au.csiro.ontology.util.Statistics;
 
 /**
  * Imports axioms in OWL format into the internal representation used by
@@ -464,21 +467,6 @@ public class OWLImporter implements IImporter {
                 + ont.getAxiomCount(AxiomType.DATA_PROPERTY_RANGE, true);
 
         int workDone = 0;
-        
-        for (OWLDeclarationAxiom a : ont.getAxioms(AxiomType.DECLARATION, true)) {
-            OWLEntity ent = a.getEntity();
-            if (ent.isOWLClass()) {
-                axioms.add(new ConceptInclusion(
-                        new Concept<>(ent.asOWLClass().toStringID()), 
-                        Concept.TOP));
-            } else if (ent.isOWLObjectProperty()) {
-                // Do nothing for now.
-            } else if (ent.isOWLDataProperty()) {
-                // Do nothing for now.
-            }
-            workDone++;
-            monitor.step(workDone, totalAxioms);
-        }
 
         for (OWLDataPropertyRangeAxiom a : ont.getAxioms(
                 AxiomType.DATA_PROPERTY_RANGE, true)) {
@@ -538,6 +526,25 @@ public class OWLImporter implements IImporter {
         for (OWLEquivalentObjectPropertiesAxiom a : ont.getAxioms(
                 AxiomType.EQUIVALENT_OBJECT_PROPERTIES, true)) {
             axioms.addAll(transformOWLEquivalentObjectPropertiesAxiom(a));
+            workDone++;
+            monitor.step(workDone, totalAxioms);
+        }
+        
+        for (OWLDeclarationAxiom a : ont.getAxioms(AxiomType.DECLARATION, true)) {
+            OWLEntity ent = a.getEntity();
+            
+            if (ent.isOWLClass()) {
+                
+               if(!ont.getAxioms(ent.asOWLClass()).isEmpty()) continue;
+                
+                axioms.add(new ConceptInclusion(
+                        new Concept<>(ent.asOWLClass().toStringID()), 
+                        Concept.TOP));
+            } else if (ent.isOWLObjectProperty()) {
+                // Do nothing for now.
+            } else if (ent.isOWLDataProperty()) {
+                // Do nothing for now.
+            }
             workDone++;
             monitor.step(workDone, totalAxioms);
         }
@@ -706,14 +713,15 @@ public class OWLImporter implements IImporter {
                         problems.add("Expected only a single literal in "+e);
                         return;
                     }
+                    l = (OWLLiteral)values.toArray()[0];
+                } else if(range instanceof OWLDatatypeRestriction) {
+                    
                 } else {
-                    problems.add("Only a data range of type OWLDataOneOf is " +
-                    	"supported in an OWLDataSomeValuesFrom expression. " +
-                    	"Found a different type in "+e);
-                    return;
+                    throw new RuntimeException("Unsupporter OWLDataRange: "+
+                            range.getClass().getName());
                 }
                 
-                OWLDatatype type = range.asOWLDatatype();
+                OWLDatatype type = l.getDatatype();
                 checkInconsistentProperty(dp, type);
                 
                 Feature<String> f = new Feature<>(dp.toStringID());
@@ -782,7 +790,7 @@ public class OWLImporter implements IImporter {
 
             public void visit(OWLObjectIntersectionOf e) {
                 List<IConcept> items = new ArrayList<IConcept>();
-
+                
                 for (OWLClassExpression desc : e.getOperands()) {
                     desc.accept(this);
                     items.add(pop());
@@ -831,6 +839,9 @@ public class OWLImporter implements IImporter {
     @Override
     public Map<String, Map<String, IOntology<String>>> getOntologyVersions(
             IProgressMonitor monitor) {
+        
+        long start = System.currentTimeMillis();
+        
         Set<IAxiom> ont = null;
         String url = null;
         if(ontology != null) {
@@ -850,7 +861,9 @@ public class OWLImporter implements IImporter {
         Map<String, IOntology<String>> map = new HashMap<>();
         map.put(sdf.format(new Date()), o);
         res.put(url, map);
-             
+        
+        Statistics.INSTANCE.setTime("owl loading", 
+                System.currentTimeMillis() - start);
         return res;
     }
 
