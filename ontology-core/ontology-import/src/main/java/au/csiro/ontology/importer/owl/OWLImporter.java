@@ -7,7 +7,6 @@ package au.csiro.ontology.importer.owl;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.EmptyStackException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -40,6 +39,7 @@ import org.semanticweb.owlapi.model.OWLDisjointClassesAxiom;
 import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLEquivalentClassesAxiom;
 import org.semanticweb.owlapi.model.OWLEquivalentObjectPropertiesAxiom;
+import org.semanticweb.owlapi.model.OWLFacetRestriction;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLObjectAllValuesFrom;
 import org.semanticweb.owlapi.model.OWLObjectComplementOf;
@@ -60,6 +60,7 @@ import org.semanticweb.owlapi.model.OWLSubObjectPropertyOfAxiom;
 import org.semanticweb.owlapi.model.OWLSubPropertyChainOfAxiom;
 import org.semanticweb.owlapi.model.OWLTransitiveObjectPropertyAxiom;
 import org.semanticweb.owlapi.vocab.OWL2Datatype;
+import org.semanticweb.owlapi.vocab.OWLFacet;
 
 import au.csiro.ontology.IOntology;
 import au.csiro.ontology.Ontology;
@@ -693,11 +694,8 @@ public class OWLImporter implements IImporter {
             }
 
             public void visit(OWLDataSomeValuesFrom e) {
-                // TODO: apparently there is no way to include multiple data
-                // property expressions in OWLAPI even though the spec allows it
                 OWLDataProperty dp = e.getProperty().asOWLDataProperty();
                 OWLDataRange range = e.getFiller();
-                OWLLiteral l = null;
                 
                 /* 
                  * An OWLDataRange can be one of the following: 
@@ -713,19 +711,61 @@ public class OWLImporter implements IImporter {
                         problems.add("Expected only a single literal in "+e);
                         return;
                     }
-                    l = (OWLLiteral)values.toArray()[0];
-                } else if(range instanceof OWLDatatypeRestriction) {
+                    OWLLiteral l = (OWLLiteral)values.toArray()[0];
+                    OWLDatatype type = l.getDatatype();
+                    checkInconsistentProperty(dp, type);
                     
+                    Feature<String> f = new Feature<>(dp.toStringID());
+                    push(new Datatype<>(f, Operator.EQUALS, getLiteral(l)));
+                } else if(range instanceof OWLDatatypeRestriction) {
+                    Feature<String> f = new Feature<>(dp.toStringID());
+                    
+                    OWLDatatypeRestriction dtr = (OWLDatatypeRestriction)range;
+                    Set<OWLFacetRestriction> frs = dtr.getFacetRestrictions();
+                    
+                    List<Datatype<String>> conjuncts = new ArrayList<>();
+                    for(OWLFacetRestriction fr : frs) {
+                        OWLLiteral l = fr.getFacetValue();
+                        checkInconsistentProperty(dp, l.getDatatype()); 
+                        OWLFacet facet = fr.getFacet();
+                        
+                        switch(facet) {
+                            case MAX_EXCLUSIVE:
+                                conjuncts.add(new Datatype<>(f, 
+                                        Operator.LESS_THAN, 
+                                        getLiteral(l)));
+                                break;
+                            case MAX_INCLUSIVE:
+                                conjuncts.add(new Datatype<>(f, 
+                                        Operator.LESS_THAN_EQUALS, 
+                                        getLiteral(l)));
+                                break;
+                            case MIN_EXCLUSIVE:
+                                conjuncts.add(new Datatype<>(f, 
+                                        Operator.GREATER_THAN, 
+                                        getLiteral(l)));
+                                break;
+                            case MIN_INCLUSIVE:
+                                conjuncts.add(new Datatype<>(f, 
+                                        Operator.GREATER_THAN_EQUALS, 
+                                        getLiteral(l)));
+                                break;
+                            default:
+                                throw new RuntimeException(
+                                        "Unsupported facet "+facet);  
+                        }
+                    }
+                    
+                    // Create conjunctions with all restrictions
+                    if(conjuncts.size() == 1) {
+                        push(conjuncts.get(0));
+                    } else {
+                        push(new Conjunction(conjuncts));
+                    }
                 } else {
                     throw new RuntimeException("Unsupporter OWLDataRange: "+
                             range.getClass().getName());
                 }
-                
-                OWLDatatype type = l.getDatatype();
-                checkInconsistentProperty(dp, type);
-                
-                Feature<String> f = new Feature<>(dp.toStringID());
-                push(new Datatype<>(f, Operator.EQUALS, getLiteral(l)));
             }
 
             public void visit(OWLObjectOneOf e) {
