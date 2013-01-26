@@ -21,9 +21,10 @@
 	<packaging>pom</packaging>
 	<version>1.2-SNAPSHOT</version>
 	<name>Ontology Core Model</name>
-          <properties>
-            <branch>sim-clx-internal</branch>
-          </properties>
+    <properties>
+      <branch>sim-clx-internal</branch>
+      <ontology-test-data.version>1.1</ontology-test-data.version>
+    </properties>
 	<modules>
 		<module>ontology-model</module>
 		<module>ontology-import</module>
