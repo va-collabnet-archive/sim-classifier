@@ -19,8 +19,8 @@
 	<groupId>au.csiro</groupId>
 	<artifactId>ontology-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>${branch}: (MMP) Core Model</name>
+	<version>1.1-SNAPSHOT</version>
+	<name>Ontology Core Model</name>
           <properties>
             <branch>sim-clx-internal</branch>
           </properties>
