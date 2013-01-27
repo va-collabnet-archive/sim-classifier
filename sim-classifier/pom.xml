@@ -19,12 +19,12 @@
 	<groupId>au.csiro</groupId>
 	<artifactId>snorocket-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>1.4.2-SNAPSHOT</version>
+	<version>1.4.2</version>
 	<name>SIM Classifier Parent</name>
 	<scm>
-		<connection>scm:svn:https://csfe.aceworkspace.net/svn/repos/sim-classifier/trunk/sim-classifier</connection>
-		<developerConnection>scm:svn:https://csfe.aceworkspace.net/svn/repos/sim-classifier/trunk/sim-classifier</developerConnection>
-		<url>https://csfe.aceworkspace.net/svn/repos/sim-classifier/trunk/sim-classifier</url>
+		<connection>scm:svn:https://csfe.aceworkspace.net/svn/repos/sim-classifier/tags/sim-classifier-1.4.2</connection>
+		<developerConnection>scm:svn:https://csfe.aceworkspace.net/svn/repos/sim-classifier/tags/sim-classifier-1.4.2</developerConnection>
+		<url>https://csfe.aceworkspace.net/svn/repos/sim-classifier/tags/sim-classifier-1.4.2</url>
 	</scm>
 	<modules>
 		<module>snorocket-core</module>
