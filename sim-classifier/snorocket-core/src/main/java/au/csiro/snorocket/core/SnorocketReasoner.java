@@ -183,5 +183,10 @@ final public class SnorocketReasoner<T extends Comparable<T>> implements IReason
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public boolean isClassified() {
+        return isClassified;
+    }
     
 }
